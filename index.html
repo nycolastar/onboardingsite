@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Onboarding</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #330066;
+      --brand-dark: #230047;
+      --brand-soft: #efe6f7;
+      --ink: #1f2933;
+      --muted: #667085;
+      --line: #d7dde5;
+      --surface: #f5f7fa;
+    }
+
+    body {
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .app-shell {
+      max-width: 1180px;
+    }
+
+    .topbar {
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .topbar small {
+      color: #e4d4f2;
+    }
+
+    .brand-logo {
+      background: #fff;
+      border-radius: 8px;
+      height: 52px;
+      width: 130px;
+      object-fit: contain;
+      padding: .45rem .7rem;
+    }
+
+    .nav-pills {
+      gap: .35rem;
+    }
+
+    .nav-pills .nav-link {
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #fff;
+      text-align: left;
+    }
+
+    .nav-pills .nav-link.active {
+      background: var(--brand);
+      border-color: var(--brand);
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(51, 0, 102, .08);
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .section-description {
+      color: var(--muted);
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      font-weight: 600;
+    }
+
+    .text-bg-secondary {
+      background-color: var(--brand-soft) !important;
+      color: var(--brand) !important;
+      border: 1px solid #ddc7ef;
+    }
+
+    .required::after {
+      content: " *";
+      color: #b42318;
+    }
+
+    .btn-primary {
+      --bs-btn-bg: var(--brand);
+      --bs-btn-border-color: var(--brand);
+      --bs-btn-hover-bg: var(--brand-dark);
+      --bs-btn-hover-border-color: var(--brand-dark);
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #101828;
+      color: #f2e8fb;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: .75rem 0 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container app-shell py-3">
+      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+        <div>
+          <div class="d-flex align-items-center gap-3">
+            <img class="brand-logo" src="assets/mc.png" alt="Meu Cliente">
+            <div>
+              <h1 class="h3 mb-1">Portal de Onboarding</h1>
+              <small>Cadastros organizados pelas abas da planilha de onboarding.</small>
+            </div>
+          </div>
+        </div>
+        <span class="badge text-bg-light">Clientes</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container app-shell py-4">
+    <div class="row g-3">
+      <aside class="col-lg-3">
+        <nav class="nav nav-pills flex-column" id="sectionTabs" aria-label="Abas de cadastro"></nav>
+      </aside>
+
+      <section class="col-lg-9">
+        <div class="panel p-4">
+          <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
+            <div>
+              <div class="section-title" id="sectionTitle"></div>
+              <p class="section-description" id="sectionDescription"></p>
+            </div>
+            <span class="badge rounded-pill text-bg-secondary" id="sectionBadge"></span>
+          </div>
+
+          <form id="onboardingForm" class="row g-3"></form>
+          <div id="resultado" class="mt-4"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const sections = [
+      {
+        id: 'dados_loja',
+        label: 'Dados de Loja',
+        badge: 'Dados de Loja',
+        description: 'Campos da aba Nome Fantasia, CNPJ, razao social, sigla, formato, bandeira e endereco.',
+        fields: [
+          { name: 'nome_fantasia', label: 'Nome Fantasia', required: true },
+          { name: 'cnpj', label: 'CNPJ' },
+          { name: 'razao_social', label: 'Razao Social', full: true },
+          { name: 'sigla_loja', label: 'Sigla - Loja' },
+          { name: 'formato', label: 'Formato' },
+          { name: 'bandeira', label: 'Bandeira' },
+          { name: 'cep', label: 'CEP' },
+          { name: 'endereco', label: 'Endereco', full: true },
+          { name: 'complemento', label: 'Complemento' },
+          { name: 'regiao', label: 'Regiao' }
+        ]
+      },
+      {
+        id: 'categorias',
+        label: 'Categoria',
+        badge: 'Categoria',
+        description: 'Cadastro de categoria, setor e departamento.',
+        fields: [
+          { name: 'categoria', label: 'Categoria', required: true },
+          { name: 'setor', label: 'Setor' },
+          { name: 'departamento', label: 'Departamento' }
+        ]
+      },
+      {
+        id: 'ativos_fisicos',
+        label: 'Ativos Fisicos',
+        badge: 'Ativos Fisicos',
+        description: 'Ativos por loja, com valor de custo, venda e quantidade.',
+        fields: [
+          { name: 'nome_ativo', label: 'Nome do ativo', required: true, full: true },
+          { name: 'valor_custo', label: 'Valor de custo', type: 'number', step: '0.01' },
+          { name: 'valor_venda', label: 'Valor de venda', type: 'number', step: '0.01' },
+          { name: 'loja', label: 'Loja' },
+          { name: 'quantidade', label: 'Quantidade' },
+          { name: 'observacoes', label: 'Observacoes', type: 'textarea', full: true }
+        ]
+      },
+      {
+        id: 'usuarios_internos',
+        label: 'Usuarios Internos',
+        badge: 'Usuarios Internos',
+        description: 'Pessoas internas envolvidas, e-mail, WhatsApp e area.',
+        fields: [
+          { name: 'nome', label: 'Nome', required: true },
+          { name: 'email', label: 'E-mail', type: 'email' },
+          { name: 'whatsapp', label: 'Whatsapp' },
+          { name: 'area', label: 'Area' }
+        ]
+      },
+      {
+        id: 'gerentes_loja',
+        label: 'Gerente de loja',
+        badge: 'Gerente de loja',
+        description: 'Gerentes ou e-mails das lojas e a loja responsavel.',
+        fields: [
+          { name: 'nome', label: 'Nome/Nome da loja', required: true },
+          { name: 'email', label: 'E-mail ou e-mail da loja', type: 'email' },
+          { name: 'whatsapp', label: 'Whatsapp' },
+          { name: 'loja_responsavel', label: 'Loja responsavel' }
+        ]
+      },
+      {
+        id: 'industrias',
+        label: 'Industrias',
+        badge: 'Industrias',
+        description: 'Cadastro usado quando nao houver integracao com ERP.',
+        fields: [
+          { name: 'cnpj_industria', label: 'CNPJ Industria', required: true },
+          { name: 'razao_social', label: 'Razao Social', full: true },
+          { name: 'nome_fantasia', label: 'Nome Fantasia' },
+          { name: 'codigo_interno', label: 'Codigo Interno' },
+          { name: 'nome_representante', label: 'Nome do representante' },
+          { name: 'telefone_representante', label: 'Telefone do representante' },
+          { name: 'email_representante', label: 'E-mail do representante', type: 'email' },
+          { name: 'whatsapp_representante', label: 'WhatsApp do representante' },
+          { name: 'segmento', label: 'Segmento' },
+          { name: 'faturamento', label: 'Faturamento', type: 'number', step: '0.01' }
+        ]
+      },
+      {
+        id: 'dados_bancarios',
+        label: 'Dados Bancarios',
+        badge: 'Dados Bancarios',
+        description: 'Tipos de pagamento aceitos no projeto.',
+        fields: [
+          { name: 'tipo_pagamento', label: 'Tipo de pagamento', required: true, type: 'select', options: ['Bonificacao', 'Deposito', 'Pix', 'Abatimento em Duplicata'] },
+          { name: 'observacoes', label: 'Observacoes', type: 'textarea', full: true }
+        ]
+      },
+      {
+        id: 'plantas_loja',
+        label: 'Planta de loja',
+        badge: 'Planta de loja',
+        description: 'Referencia da pasta ou link para upload das plantas de loja.',
+        fields: [
+          { name: 'pasta_upload', label: 'Pasta para upload', required: true, full: true },
+          { name: 'link_pasta', label: 'Link da pasta', type: 'url', full: true },
+          { name: 'observacoes', label: 'Observacoes', type: 'textarea', full: true }
+        ]
+      },
+      {
+        id: 'ativos_digitais',
+        label: 'Ativos Digitais',
+        badge: 'Ativos Digitais',
+        description: 'Ativos digitais com valor e canal/loja digital.',
+        fields: [
+          { name: 'nome_ativo', label: 'Nome do ativo', required: true },
+          { name: 'valor_custo', label: 'Valor de custo', type: 'number', step: '0.01' },
+          { name: 'valor_venda', label: 'Valor de venda', type: 'number', step: '0.01' },
+          { name: 'loja_digital', label: 'Loja Digital' }
+        ]
+      },
+      {
+        id: 'alcadas',
+        label: 'Alcada',
+        badge: 'Alcada',
+        description: 'Nome e percentual de alcada.',
+        fields: [
+          { name: 'nome', label: 'Nome', required: true },
+          { name: 'alcada_percentual', label: 'Alcada (%)', type: 'number', step: '0.01' }
+        ]
+      },
+      {
+        id: 'header_clientes',
+        label: 'Header Clientes',
+        badge: 'Header Clientes',
+        description: 'Dicionario de campos da base de clientes.',
+        fields: [
+          { name: 'campo', label: 'Campo', required: true },
+          { name: 'descricao', label: 'Descricao', full: true },
+          { name: 'tipo', label: 'Tipo' },
+          { name: 'manutencao', label: 'Manutencao' },
+          { name: 'fonte', label: 'Fonte' },
+          { name: 'comentario', label: 'Comentario', type: 'textarea', full: true }
+        ]
+      }
+    ];
+
+    const tabs = document.getElementById('sectionTabs');
+    const form = document.getElementById('onboardingForm');
+    const resultBox = document.getElementById('resultado');
+    let activeSection = sections[0];
+
+    function renderTabs() {
+      tabs.innerHTML = sections.map((section, index) => `
+        <button
+          class="nav-link ${index === 0 ? 'active' : ''}"
+          type="button"
+          data-section="${section.id}">
+          ${section.label}
+        </button>
+      `).join('');
+    }
+
+    function fieldTemplate(field) {
+      const colClass = field.full ? 'col-12' : 'col-md-6';
+      const requiredClass = field.required ? 'required' : '';
+      const requiredAttr = field.required ? 'required' : '';
+
+      if (field.type === 'textarea') {
+        return `
+          <div class="${colClass}">
+            <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+            <textarea class="form-control" id="${field.name}" name="${field.name}" rows="3" ${requiredAttr}></textarea>
+          </div>
+        `;
+      }
+
+      if (field.type === 'select') {
+        const options = ['<option value="">Selecione</option>']
+          .concat(field.options.map(option => `<option value="${option}">${option}</option>`));
+        return `
+          <div class="${colClass}">
+            <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+            <select class="form-select" id="${field.name}" name="${field.name}" ${requiredAttr}>
+              ${options.join('')}
+            </select>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="${colClass}">
+          <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+          <input
+            class="form-control"
+            id="${field.name}"
+            name="${field.name}"
+            type="${field.type || 'text'}"
+            ${field.step ? `step="${field.step}"` : ''}
+            ${requiredAttr}>
+        </div>
+      `;
+    }
+
+    function renderSection(section) {
+      activeSection = section;
+      document.getElementById('sectionTitle').textContent = section.label;
+      document.getElementById('sectionDescription').textContent = section.description;
+      document.getElementById('sectionBadge').textContent = section.badge;
+      resultBox.innerHTML = '';
+
+      form.innerHTML = `
+        <input type="hidden" name="section" value="${section.id}">
+        ${section.fields.map(fieldTemplate).join('')}
+        <div class="col-12 d-flex flex-column flex-sm-row gap-2 justify-content-end mt-2">
+          <button type="reset" class="btn btn-outline-secondary">Limpar</button>
+          <button type="submit" class="btn btn-primary">Salvar registro</button>
+        </div>
+      `;
+    }
+
+    tabs.addEventListener('click', event => {
+      const button = event.target.closest('[data-section]');
+      if (!button) return;
+
+      tabs.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+      button.classList.add('active');
+
+      const section = sections.find(item => item.id === button.dataset.section);
+      renderSection(section);
+    });
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      resultBox.innerHTML = '<div class="alert alert-info mb-0">Salvando...</div>';
+
+      try {
+        const response = await fetch('backend/api/save_onboarding.php', {
+          method: 'POST',
+          body: new FormData(form)
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || 'Nao foi possivel salvar o registro.');
+        }
+
+        resultBox.innerHTML = `
+          <div class="alert alert-success mb-0">${result.message}</div>
+          <pre>${result.sql}</pre>
+        `;
+        form.reset();
+      } catch (error) {
+        resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
+    renderTabs();
+    renderSection(activeSection);
+  </script>
+</body>
+</html>

@@ -1,55 +1,31 @@
 # Onboarding System
 
-## Stack
-- Frontend: HTML + Bootstrap
-- Backend: PHP
-- Banco: MySQL
-- Deploy futuro:
-  - GitHub
-  - Vercel
-  - Render
+Sistema simples em HTML, Bootstrap, PHP e MySQL para substituir a planilha de onboarding por cadastros separados por aba. O portal e generico para todos os clientes.
 
-## Estrutura Inicial
+## Abas da planilha mapeadas
 
-### Abas identificadas da planilha atual
-- Cronograma Implantação
 - Dados de Loja
 - Categoria
-- Ativos Físicos
-- Usuários Internos
+- Ativos Fisicos
+- Usuarios Internos
 - Gerente de loja
-- Indústrias
-- Dados Bancários
+- Industrias
+- Dados Bancarios
 - Planta de loja
 - Ativos Digitais
-- Alçada
+- Alcada
 - Header Clientes
 
 ## Como rodar localmente
 
-1. Coloque a pasta em:
-```text
-xampp/htdocs/
-```
+1. Coloque a pasta em `C:\xampp\htdocs\onboardingsite`.
+2. Inicie Apache e MySQL no XAMPP.
+3. Importe ou rode o arquivo `sql/schema.sql` no MySQL.
+4. Acesse `http://localhost/onboardingsite/`.
 
-2. Inicie:
-- Apache
-- MySQL
+## Estrutura
 
-3. Rode o SQL:
-```text
-sql/schema.sql
-```
-
-4. Acesse:
-```text
-http://localhost/onboarding-system/frontend
-```
-
-## Próximos passos
-- Criar login
-- Criar múltiplos módulos
-- Gerar SQL por tabela
-- Exportar TXT
-- Migrar para PostgreSQL
-- Deploy GitHub + Render + Vercel
+- `index.html`: interface com abas e formularios.
+- `backend/api/save_onboarding.php`: API unica para gravar cada aba em sua tabela.
+- `backend/config/db.php`: conexao com o banco `onboarding_system`.
+- `sql/schema.sql`: criacao do banco e das tabelas.
