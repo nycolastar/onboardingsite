@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS usuarios_acesso (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     pin VARCHAR(20) NOT NULL UNIQUE,
+    drive_link VARCHAR(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -129,17 +130,4 @@ CREATE TABLE IF NOT EXISTS alcadas (
     alcada_percentual DECIMAL(5,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_alcadas_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_acesso(id) ON DELETE SET NULL
-);
-
-CREATE TABLE IF NOT EXISTS header_clientes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT,
-    campo VARCHAR(180) NOT NULL,
-    descricao TEXT,
-    tipo VARCHAR(120),
-    manutencao VARCHAR(120),
-    fonte VARCHAR(180),
-    comentario TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_header_clientes_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_acesso(id) ON DELETE SET NULL
 );

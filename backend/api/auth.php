@@ -40,7 +40,7 @@ try {
             exit;
         }
 
-        $stmt = $pdo->prepare('SELECT id, nome, pin FROM usuarios_acesso WHERE pin = :pin LIMIT 1');
+        $stmt = $pdo->prepare('SELECT id, nome, pin, drive_link FROM usuarios_acesso WHERE pin = :pin LIMIT 1');
         $stmt->execute([':pin' => $pin]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -52,7 +52,8 @@ try {
         $_SESSION['user'] = [
             'id' => (int) $user['id'],
             'nome' => $user['nome'],
-            'pin' => $user['pin']
+            'pin' => $user['pin'],
+            'drive_link' => $user['drive_link']
         ];
 
         echo json_encode([

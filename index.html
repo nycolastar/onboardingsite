@@ -137,6 +137,32 @@
       color: var(--warn);
     }
 
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    .records-table-wrap {
+      max-height: 360px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .records-table {
+      min-width: 780px;
+      margin-bottom: 0;
+    }
+
+    .records-table th {
+      position: sticky;
+      top: 0;
+      background: var(--brand);
+      color: #fff;
+      z-index: 1;
+    }
+
     pre {
       white-space: pre-wrap;
       background: #101828;
@@ -201,6 +227,10 @@
                 <label class="form-label required" for="userName">Nome do usuario</label>
                 <input class="form-control" id="userName" name="nome" placeholder="Meu Cliente x Coop" required>
               </div>
+              <div class="col-12">
+                <label class="form-label" for="driveLink">Link do Drive</label>
+                <input class="form-control" id="driveLink" name="drive_link" type="url" placeholder="https://drive.google.com/...">
+              </div>
               <div class="col-12 d-grid">
                 <button class="btn btn-primary" type="submit">Gerar PIN</button>
               </div>
@@ -218,6 +248,18 @@
               <button class="btn btn-outline-secondary" id="refreshUsersButton" type="button">Atualizar</button>
             </div>
             <div id="usersList"></div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="panel p-4" id="recordsPanel" hidden>
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+              <div>
+                <div class="section-title" id="recordsTitle">Dados enviados</div>
+                <p class="section-description" id="recordsDescription"></p>
+              </div>
+              <div class="admin-actions" id="recordsActions"></div>
+            </div>
+            <div id="recordsContent"></div>
           </div>
         </div>
       </div>
@@ -279,20 +321,6 @@
         ]
       },
       {
-        id: 'ativos_fisicos',
-        label: 'Ativos Fisicos',
-        badge: 'Ativos Fisicos',
-        description: 'Ativos por loja, com valor de custo, venda e quantidade.',
-        fields: [
-          { name: 'nome_ativo', label: 'Nome do ativo', required: true, full: true },
-          { name: 'valor_custo', label: 'Valor de custo', type: 'number', step: '0.01' },
-          { name: 'valor_venda', label: 'Valor de venda', type: 'number', step: '0.01' },
-          { name: 'loja', label: 'Loja' },
-          { name: 'quantidade', label: 'Quantidade' },
-          { name: 'observacoes', label: 'Observacoes', type: 'textarea', full: true }
-        ]
-      },
-      {
         id: 'usuarios_internos',
         label: 'Usuarios Internos',
         badge: 'Usuarios Internos',
@@ -348,10 +376,23 @@
         id: 'plantas_loja',
         label: 'Planta de loja',
         badge: 'Planta de loja',
-        description: 'Referencia da pasta ou link para upload das plantas de loja.',
+        description: 'Acesse o espaco do cliente no Drive para enviar as plantas de loja.',
+        driveLink: true,
         fields: [
-          { name: 'pasta_upload', label: 'Pasta para upload', required: true, full: true },
-          { name: 'link_pasta', label: 'Link da pasta', type: 'url', full: true },
+          { name: 'observacoes', label: 'Observacoes', type: 'textarea', full: true }
+        ]
+      },
+      {
+        id: 'ativos_fisicos',
+        label: 'Ativos Fisicos',
+        badge: 'Ativos Fisicos',
+        description: 'Ativos por loja, com valor de custo, venda e quantidade.',
+        fields: [
+          { name: 'nome_ativo', label: 'Nome do ativo', required: true, full: true },
+          { name: 'valor_custo', label: 'Valor de custo', type: 'number', step: '0.01' },
+          { name: 'valor_venda', label: 'Valor de venda', type: 'number', step: '0.01' },
+          { name: 'loja', label: 'Loja' },
+          { name: 'quantidade', label: 'Quantidade' },
           { name: 'observacoes', label: 'Observacoes', type: 'textarea', full: true }
         ]
       },
@@ -377,20 +418,6 @@
           { name: 'alcada_percentual', label: 'Alcada (%)', type: 'number', step: '0.01' }
         ]
       },
-      {
-        id: 'header_clientes',
-        label: 'Header Clientes',
-        badge: 'Header Clientes',
-        description: 'Dicionario de campos da base de clientes.',
-        fields: [
-          { name: 'campo', label: 'Campo', required: true },
-          { name: 'descricao', label: 'Descricao', full: true },
-          { name: 'tipo', label: 'Tipo' },
-          { name: 'manutencao', label: 'Manutencao' },
-          { name: 'fonte', label: 'Fonte' },
-          { name: 'comentario', label: 'Comentario', type: 'textarea', full: true }
-        ]
-      }
     ];
 
     const loginView = document.getElementById('loginView');
@@ -406,10 +433,16 @@
     const createUserResult = document.getElementById('createUserResult');
     const refreshUsersButton = document.getElementById('refreshUsersButton');
     const usersList = document.getElementById('usersList');
+    const recordsPanel = document.getElementById('recordsPanel');
+    const recordsTitle = document.getElementById('recordsTitle');
+    const recordsDescription = document.getElementById('recordsDescription');
+    const recordsActions = document.getElementById('recordsActions');
+    const recordsContent = document.getElementById('recordsContent');
     const tabs = document.getElementById('sectionTabs');
     const form = document.getElementById('onboardingForm');
     const resultBox = document.getElementById('resultado');
     let activeSection = sections[0];
+    let currentUser = null;
 
     function setView(view, data = {}) {
       loginView.hidden = view !== 'login';
@@ -422,10 +455,12 @@
         appSubtitle.textContent = 'Gerencie usuarios, PINs e status dos envios.';
         sessionBadge.textContent = 'Admin';
       } else if (view === 'user') {
+        currentUser = data.user || currentUser;
         appTitle.textContent = data.user?.nome || 'Onboarding';
         appSubtitle.textContent = 'Preencha as informacoes para o onboarding.';
         sessionBadge.textContent = data.user?.pin || 'Cliente';
       } else {
+        currentUser = null;
         appTitle.textContent = 'Onboarding';
         appSubtitle.textContent = 'Acesse com seu PIN para continuar.';
         sessionBadge.textContent = 'Login';
@@ -502,8 +537,21 @@
       document.getElementById('sectionBadge').textContent = section.badge;
       resultBox.innerHTML = '';
 
+      const driveLinkBlock = section.driveLink ? `
+        <div class="col-12">
+          <div class="alert ${currentUser?.drive_link ? 'alert-primary' : 'alert-warning'} mb-0">
+            ${currentUser?.drive_link
+              ? `Use o botao abaixo para acessar o espaco deste cliente no Drive.<br><a class="btn btn-primary mt-3" href="${escapeHtml(currentUser.drive_link)}" target="_blank" rel="noopener">Abrir Drive</a>`
+              : 'O link do Drive ainda nao foi configurado pelo admin.'}
+          </div>
+        </div>
+        <input type="hidden" name="pasta_upload" value="Upload via Drive">
+        <input type="hidden" name="link_pasta" value="${escapeHtml(currentUser?.drive_link || '')}">
+      ` : '';
+
       form.innerHTML = `
         <input type="hidden" name="section" value="${section.id}">
+        ${driveLinkBlock}
         ${section.fields.map(fieldTemplate).join('')}
         <div class="col-12 d-flex flex-column flex-sm-row gap-2 justify-content-end mt-2">
           <button type="reset" class="btn btn-outline-secondary">Limpar</button>
@@ -527,11 +575,22 @@
             <div>
               <h2 class="h5 mb-1">${escapeHtml(user.nome)}</h2>
               <div class="text-muted small">Criado em ${formatDate(user.created_at)}</div>
+              <div class="small mt-1">
+                ${user.drive_link
+                  ? `<a href="${escapeHtml(user.drive_link)}" target="_blank" rel="noopener">Pasta do Drive configurada</a>`
+                  : '<span class="text-warning">Pasta do Drive pendente</span>'}
+              </div>
             </div>
             <div class="text-md-end">
               <div class="pin-code">${escapeHtml(user.pin)}</div>
               <div class="small text-muted">${user.completed}/${user.total} abas enviadas</div>
             </div>
+          </div>
+          <div class="admin-actions mb-3">
+            <button class="btn btn-sm btn-primary" type="button" data-action="records" data-user-id="${user.id}">Ver tabela</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="drive" data-user-id="${user.id}" data-drive-link="${escapeHtml(user.drive_link || '')}">${user.drive_link ? 'Editar pasta' : 'Adicionar pasta'}</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="excel" data-user-id="${user.id}">Exportar Excel</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="sql" data-user-id="${user.id}">Exportar SQL</button>
           </div>
           <div class="status-grid">
             ${user.progress.map(item => `
@@ -543,6 +602,80 @@
           </div>
         </article>
       `).join('');
+    }
+
+    async function loadUserRecords(userId) {
+      recordsPanel.hidden = false;
+      recordsTitle.textContent = 'Dados enviados';
+      recordsDescription.textContent = '';
+      recordsActions.innerHTML = '';
+      recordsContent.innerHTML = '<div class="alert alert-info mb-0">Carregando dados...</div>';
+
+      const result = await requestJson(`backend/api/admin_users.php?action=records&user_id=${encodeURIComponent(userId)}`);
+      renderUserRecords(result.user, result.sections);
+    }
+
+    function renderUserRecords(user, recordSections) {
+      recordsTitle.textContent = user.nome;
+      recordsDescription.textContent = `PIN ${user.pin} - visualizacao dos registros enviados por aba.`;
+      recordsActions.innerHTML = `
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-action="excel" data-user-id="${user.id}">Exportar Excel</button>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-action="sql" data-user-id="${user.id}">Exportar SQL</button>
+      `;
+
+      recordsContent.innerHTML = recordSections.map(section => `
+        <section class="mb-4">
+          <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-2">
+            <h3 class="h6 mb-0">${escapeHtml(section.label)}</h3>
+            <span class="badge text-bg-secondary">${section.rows.length} registro(s)</span>
+          </div>
+          ${section.rows.length === 0 ? '<div class="alert alert-warning mb-0">Nenhum registro enviado nesta aba.</div>' : renderRecordsTable(section)}
+        </section>
+      `).join('');
+
+      recordsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderRecordsTable(section) {
+      return `
+        <div class="records-table-wrap">
+          <table class="table table-sm table-striped records-table">
+            <thead>
+              <tr>
+                ${section.columns.map(column => `<th>${escapeHtml(column)}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${section.rows.map(row => `
+                <tr>
+                  ${section.columns.map(column => `<td>${escapeHtml(row[column] ?? '')}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function downloadAdminExport(userId, type) {
+      window.location.href = `backend/api/admin_export.php?type=${encodeURIComponent(type)}&user_id=${encodeURIComponent(userId)}`;
+    }
+
+    async function updateDriveLink(userId, currentLink) {
+      const driveLink = prompt('Link da pasta no Drive:', currentLink || '');
+
+      if (driveLink === null) return;
+
+      const formData = new FormData();
+      formData.append('user_id', userId);
+      formData.append('drive_link', driveLink.trim());
+
+      await requestJson('backend/api/admin_users.php?action=update_drive_link', {
+        method: 'POST',
+        body: formData
+      });
+
+      await loadUsers();
     }
 
     function escapeHtml(value) {
@@ -619,6 +752,37 @@
       }
     });
 
+    usersList.addEventListener('click', async event => {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+
+      const userId = button.dataset.userId;
+
+      try {
+        if (button.dataset.action === 'records') {
+          await loadUserRecords(userId);
+          return;
+        }
+
+        if (button.dataset.action === 'drive') {
+          await updateDriveLink(userId, button.dataset.driveLink || '');
+          return;
+        }
+
+        downloadAdminExport(userId, button.dataset.action);
+      } catch (error) {
+        recordsPanel.hidden = false;
+        recordsContent.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
+    recordsActions.addEventListener('click', event => {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+
+      downloadAdminExport(button.dataset.userId, button.dataset.action);
+    });
+
     logoutButton.addEventListener('click', async () => {
       await requestJson('backend/api/auth.php?action=logout', { method: 'POST' });
       setView('login');
@@ -647,7 +811,6 @@
 
         resultBox.innerHTML = `
           <div class="alert alert-success mb-0">${result.message}</div>
-          <pre>${result.sql}</pre>
         `;
         form.reset();
       } catch (error) {
@@ -674,6 +837,7 @@
         }
 
         setView('user', { user: result.user });
+        renderSection(activeSection);
       } catch (error) {
         setView('login');
       }

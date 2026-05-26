@@ -5,20 +5,9 @@ header('Content-Type: application/json; charset=utf-8');
 session_start();
 
 require_once '../config/db.php';
+require_once '../config/onboarding_sections.php';
 
-$sections = [
-    'dados_loja' => 'Dados de Loja',
-    'categorias' => 'Categoria',
-    'ativos_fisicos' => 'Ativos Fisicos',
-    'usuarios_internos' => 'Usuarios Internos',
-    'gerentes_loja' => 'Gerente de loja',
-    'industrias' => 'Industrias',
-    'dados_bancarios' => 'Dados Bancarios',
-    'plantas_loja' => 'Planta de loja',
-    'ativos_digitais' => 'Ativos Digitais',
-    'alcadas' => 'Alcada',
-    'header_clientes' => 'Header Clientes',
-];
+$sections = $onboardingSections;
 
 try {
     requireAdmin();
@@ -27,16 +16,18 @@ try {
 
     if ($action === 'create') {
         $name = trim($_POST['nome'] ?? '');
+        $driveLink = trim($_POST['drive_link'] ?? '');
 
         if ($name === '') {
             respond(422, false, 'Informe o nome do usuario.');
         }
 
         $pin = generateUniquePin($pdo);
-        $stmt = $pdo->prepare('INSERT INTO usuarios_acesso (nome, pin) VALUES (:nome, :pin)');
+        $stmt = $pdo->prepare('INSERT INTO usuarios_acesso (nome, pin, drive_link) VALUES (:nome, :pin, :drive_link)');
         $stmt->execute([
             ':nome' => $name,
-            ':pin' => $pin
+            ':pin' => $pin,
+            ':drive_link' => $driveLink === '' ? null : $driveLink
         ]);
 
         echo json_encode([
@@ -45,7 +36,8 @@ try {
             'user' => [
                 'id' => (int) $pdo->lastInsertId(),
                 'nome' => $name,
-                'pin' => $pin
+                'pin' => $pin,
+                'drive_link' => $driveLink
             ]
         ]);
         exit;
@@ -54,8 +46,57 @@ try {
     if ($action === 'list') {
         echo json_encode([
             'success' => true,
-            'sections' => $sections,
+            'sections' => array_map(fn($section) => $section['label'], $sections),
             'users' => listUsers($pdo, $sections)
+        ]);
+        exit;
+    }
+
+    if ($action === 'update_drive_link') {
+        $userId = (int) ($_POST['user_id'] ?? 0);
+        $driveLink = trim($_POST['drive_link'] ?? '');
+
+        if ($userId <= 0) {
+            respond(422, false, 'Usuario invalido.');
+        }
+
+        $user = findUser($pdo, $userId);
+
+        if (!$user) {
+            respond(404, false, 'Usuario nao encontrado.');
+        }
+
+        $stmt = $pdo->prepare('UPDATE usuarios_acesso SET drive_link = :drive_link WHERE id = :id');
+        $stmt->execute([
+            ':drive_link' => $driveLink === '' ? null : $driveLink,
+            ':id' => $userId
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Link da pasta atualizado.',
+            'drive_link' => $driveLink
+        ]);
+        exit;
+    }
+
+    if ($action === 'records') {
+        $userId = (int) ($_GET['user_id'] ?? 0);
+
+        if ($userId <= 0) {
+            respond(422, false, 'Usuario invalido.');
+        }
+
+        $user = findUser($pdo, $userId);
+
+        if (!$user) {
+            respond(404, false, 'Usuario nao encontrado.');
+        }
+
+        echo json_encode([
+            'success' => true,
+            'user' => $user,
+            'sections' => listRecords($pdo, $sections, $userId)
         ]);
         exit;
     }
@@ -75,7 +116,7 @@ function requireAdmin(): void
 function listUsers(PDO $pdo, array $sections): array
 {
     $users = $pdo
-        ->query('SELECT id, nome, pin, created_at FROM usuarios_acesso ORDER BY created_at DESC, id DESC')
+        ->query('SELECT id, nome, pin, drive_link, created_at FROM usuarios_acesso ORDER BY created_at DESC, id DESC')
         ->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($users as &$user) {
@@ -83,7 +124,7 @@ function listUsers(PDO $pdo, array $sections): array
         $user['progress'] = [];
         $sent = 0;
 
-        foreach ($sections as $table => $label) {
+        foreach ($sections as $table => $section) {
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM {$table} WHERE usuario_id = :usuario_id");
             $stmt->execute([':usuario_id' => $user['id']]);
             $count = (int) $stmt->fetchColumn();
@@ -94,7 +135,7 @@ function listUsers(PDO $pdo, array $sections): array
 
             $user['progress'][] = [
                 'section' => $table,
-                'label' => $label,
+                'label' => $section['label'],
                 'count' => $count,
                 'sent' => $count > 0
             ];
@@ -105,6 +146,46 @@ function listUsers(PDO $pdo, array $sections): array
     }
 
     return $users;
+}
+
+function findUser(PDO $pdo, int $userId): ?array
+{
+    $stmt = $pdo->prepare('SELECT id, nome, pin, drive_link, created_at FROM usuarios_acesso WHERE id = :id');
+    $stmt->execute([':id' => $userId]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user) {
+        return null;
+    }
+
+    $user['id'] = (int) $user['id'];
+    return $user;
+}
+
+function listRecords(PDO $pdo, array $sections, int $userId): array
+{
+    $records = [];
+
+    foreach ($sections as $table => $section) {
+        $columns = array_merge(['id'], $section['columns'], ['created_at']);
+        $sql = sprintf(
+            'SELECT %s FROM %s WHERE usuario_id = :usuario_id ORDER BY id ASC',
+            implode(', ', $columns),
+            $table
+        );
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':usuario_id' => $userId]);
+
+        $records[] = [
+            'section' => $table,
+            'label' => $section['label'],
+            'columns' => $columns,
+            'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)
+        ];
+    }
+
+    return $records;
 }
 
 function generateUniquePin(PDO $pdo): string
