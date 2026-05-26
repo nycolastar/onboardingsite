@@ -163,6 +163,58 @@
       z-index: 1;
     }
 
+    .mode-switch {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .mode-switch button {
+      border: 0;
+      background: #fff;
+      color: var(--ink);
+      padding: .45rem .75rem;
+    }
+
+    .mode-switch button.active {
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .bulk-grid-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .bulk-grid {
+      min-width: 980px;
+      margin-bottom: 0;
+    }
+
+    .bulk-grid th {
+      background: var(--brand);
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      white-space: nowrap;
+    }
+
+    .bulk-grid td {
+      min-width: 170px;
+      vertical-align: top;
+    }
+
+    .bulk-grid .row-number {
+      min-width: 56px;
+      width: 56px;
+      text-align: center;
+      color: var(--muted);
+    }
+
     pre {
       white-space: pre-wrap;
       background: #101828;
@@ -278,10 +330,32 @@
                 <div class="section-title" id="sectionTitle"></div>
                 <p class="section-description" id="sectionDescription"></p>
               </div>
-              <span class="badge rounded-pill text-bg-secondary" id="sectionBadge"></span>
+              <div class="d-flex flex-column align-items-md-end gap-2">
+                <span class="badge rounded-pill text-bg-secondary" id="sectionBadge"></span>
+                <div class="mode-switch" aria-label="Modo de preenchimento">
+                  <button class="active" id="singleModeButton" type="button">Registro individual</button>
+                  <button id="bulkModeButton" type="button">Grade</button>
+                </div>
+              </div>
             </div>
 
-            <form id="onboardingForm" class="row g-3"></form>
+            <div id="singleEntryView">
+              <form id="onboardingForm" class="row g-3"></form>
+            </div>
+            <div id="bulkEntryView" hidden>
+              <form id="bulkForm">
+                <div class="bulk-grid-wrap">
+                  <table class="table table-sm bulk-grid" id="bulkTable"></table>
+                </div>
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-between align-items-sm-center mt-3">
+                  <button class="btn btn-outline-secondary" id="addBulkRowButton" type="button">Adicionar linha</button>
+                  <div class="d-flex flex-column flex-sm-row gap-2">
+                    <button class="btn btn-outline-secondary" id="clearBulkButton" type="button">Limpar grade</button>
+                    <button class="btn btn-primary" type="submit">Salvar grade</button>
+                  </div>
+                </div>
+              </form>
+            </div>
             <div id="resultado" class="mt-4"></div>
           </div>
         </section>
@@ -440,9 +514,18 @@
     const recordsContent = document.getElementById('recordsContent');
     const tabs = document.getElementById('sectionTabs');
     const form = document.getElementById('onboardingForm');
+    const singleEntryView = document.getElementById('singleEntryView');
+    const bulkEntryView = document.getElementById('bulkEntryView');
+    const singleModeButton = document.getElementById('singleModeButton');
+    const bulkModeButton = document.getElementById('bulkModeButton');
+    const bulkForm = document.getElementById('bulkForm');
+    const bulkTable = document.getElementById('bulkTable');
+    const addBulkRowButton = document.getElementById('addBulkRowButton');
+    const clearBulkButton = document.getElementById('clearBulkButton');
     const resultBox = document.getElementById('resultado');
     let activeSection = sections[0];
     let currentUser = null;
+    let entryMode = 'single';
 
     function setView(view, data = {}) {
       loginView.hidden = view !== 'login';
@@ -558,6 +641,104 @@
           <button type="submit" class="btn btn-primary">Salvar registro</button>
         </div>
       `;
+
+      if (entryMode === 'bulk' && !canUseBulk(section)) {
+        setEntryMode('single');
+      } else {
+        renderBulkGrid(section);
+      }
+    }
+
+    function canUseBulk(section) {
+      return !section.driveLink;
+    }
+
+    function setEntryMode(mode) {
+      entryMode = mode === 'bulk' && canUseBulk(activeSection) ? 'bulk' : 'single';
+      singleEntryView.hidden = entryMode !== 'single';
+      bulkEntryView.hidden = entryMode !== 'bulk';
+      singleModeButton.classList.toggle('active', entryMode === 'single');
+      bulkModeButton.classList.toggle('active', entryMode === 'bulk');
+      bulkModeButton.disabled = !canUseBulk(activeSection);
+      resultBox.innerHTML = '';
+
+      if (entryMode === 'bulk') {
+        renderBulkGrid(activeSection);
+      }
+    }
+
+    function renderBulkGrid(section, rowCount = 5) {
+      if (!canUseBulk(section)) {
+        bulkTable.innerHTML = '';
+        return;
+      }
+
+      const rows = Array.from({ length: rowCount }, (_, index) => bulkRowTemplate(section, index));
+      bulkTable.innerHTML = `
+        <thead>
+          <tr>
+            <th class="row-number">#</th>
+            ${section.fields.map(field => `<th>${escapeHtml(field.label)}${field.required ? ' *' : ''}</th>`).join('')}
+            <th class="row-number"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.join('')}
+        </tbody>
+      `;
+    }
+
+    function bulkRowTemplate(section, index) {
+      return `
+        <tr data-row>
+          <td class="row-number">${index + 1}</td>
+          ${section.fields.map(field => `<td>${bulkFieldTemplate(field)}</td>`).join('')}
+          <td class="row-number">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-remove-row>&times;</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    function bulkFieldTemplate(field) {
+      const baseAttrs = `class="form-control form-control-sm" data-field="${field.name}" ${field.step ? `step="${field.step}"` : ''}`;
+
+      if (field.type === 'select') {
+        const options = ['<option value=""></option>']
+          .concat(field.options.map(option => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`));
+        return `<select class="form-select form-select-sm" data-field="${field.name}">${options.join('')}</select>`;
+      }
+
+      if (field.type === 'textarea') {
+        return `<textarea ${baseAttrs} rows="1"></textarea>`;
+      }
+
+      return `<input ${baseAttrs} type="${field.type || 'text'}">`;
+    }
+
+    function addBulkRows(count = 1) {
+      const tbody = bulkTable.querySelector('tbody');
+      if (!tbody) return;
+
+      const start = tbody.querySelectorAll('[data-row]').length;
+      const markup = Array.from({ length: count }, (_, offset) => bulkRowTemplate(activeSection, start + offset)).join('');
+      tbody.insertAdjacentHTML('beforeend', markup);
+    }
+
+    function renumberBulkRows() {
+      bulkTable.querySelectorAll('[data-row]').forEach((row, index) => {
+        row.querySelector('.row-number').textContent = index + 1;
+      });
+    }
+
+    function collectBulkRows() {
+      return Array.from(bulkTable.querySelectorAll('[data-row]')).map(row => {
+        const data = {};
+        activeSection.fields.forEach(field => {
+          data[field.name] = row.querySelector(`[data-field="${field.name}"]`)?.value.trim() || '';
+        });
+        return data;
+      });
     }
 
     async function loadUsers() {
@@ -797,6 +978,42 @@
 
       const section = sections.find(item => item.id === button.dataset.section);
       renderSection(section);
+      setEntryMode(entryMode);
+    });
+
+    singleModeButton.addEventListener('click', () => {
+      setEntryMode('single');
+    });
+
+    bulkModeButton.addEventListener('click', () => {
+      setEntryMode('bulk');
+    });
+
+    addBulkRowButton.addEventListener('click', () => {
+      addBulkRows(1);
+    });
+
+    clearBulkButton.addEventListener('click', () => {
+      renderBulkGrid(activeSection);
+      resultBox.innerHTML = '';
+    });
+
+    bulkTable.addEventListener('click', event => {
+      const button = event.target.closest('[data-remove-row]');
+      if (!button) return;
+
+      const row = button.closest('[data-row]');
+      const rows = bulkTable.querySelectorAll('[data-row]');
+
+      if (rows.length === 1) {
+        row.querySelectorAll('[data-field]').forEach(field => {
+          field.value = '';
+        });
+        return;
+      }
+
+      row.remove();
+      renumberBulkRows();
     });
 
     form.addEventListener('submit', async event => {
@@ -818,9 +1035,31 @@
       }
     });
 
+    bulkForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      resultBox.innerHTML = '<div class="alert alert-info mb-0">Salvando grade...</div>';
+
+      try {
+        const formData = new FormData();
+        formData.append('section', activeSection.id);
+        formData.append('rows_json', JSON.stringify(collectBulkRows()));
+
+        const result = await requestJson('backend/api/save_onboarding.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        resultBox.innerHTML = `<div class="alert alert-success mb-0">${result.message}</div>`;
+        renderBulkGrid(activeSection);
+      } catch (error) {
+        resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
     async function boot() {
       renderTabs();
       renderSection(activeSection);
+      setEntryMode('single');
 
       try {
         const result = await requestJson('backend/api/auth.php?action=status');

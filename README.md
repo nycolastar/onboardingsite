@@ -18,6 +18,10 @@ No painel admin e possivel:
 - exportar os dados do cliente para Excel;
 - exportar um script SQL para uso no DBeaver ou outro cliente de banco.
 
+## Preenchimento em grade
+
+Na area do cliente, o modo `Grade` permite preencher varias linhas da mesma aba antes de salvar. Linhas vazias sao ignoradas, e linhas parcialmente preenchidas ainda respeitam os campos obrigatorios.
+
 ## Abas da planilha mapeadas
 
 - Dados de Loja

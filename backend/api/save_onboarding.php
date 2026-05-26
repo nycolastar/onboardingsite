@@ -43,8 +43,95 @@ try {
         exit;
     }
 
-    foreach ($required[$section] as $field) {
-        if (trim($_POST[$field] ?? '') === '') {
+    if (isset($_POST['rows_json'])) {
+        $rows = json_decode($_POST['rows_json'], true);
+
+        if (!is_array($rows)) {
+            http_response_code(422);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Dados da grade invalidos.'
+            ]);
+            exit;
+        }
+
+        $saved = saveRows($pdo, $section, $schemas[$section], $required[$section], $rows, (int) $_SESSION['user']['id']);
+
+        echo json_encode([
+            'success' => true,
+            'message' => $saved . ' registro(s) salvo(s) com sucesso.',
+            'count' => $saved
+        ]);
+        exit;
+    }
+
+    $savedId = saveSingleRow($pdo, $section, $schemas[$section], $required[$section], $_POST, (int) $_SESSION['user']['id']);
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Registro salvo com sucesso.',
+        'id' => $savedId
+    ]);
+} catch (Throwable $error) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Erro ao salvar: ' . $error->getMessage()
+    ]);
+}
+
+function saveRows(PDO $pdo, string $section, array $schema, array $required, array $rows, int $userId): int
+{
+    $validRows = [];
+
+    foreach ($rows as $row) {
+        if (!is_array($row) || rowIsEmpty($row, $schema)) {
+            continue;
+        }
+
+        foreach ($required as $field) {
+            if (trim($row[$field] ?? '') === '') {
+                http_response_code(422);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Preencha os campos obrigatorios nas linhas preenchidas.'
+                ]);
+                exit;
+            }
+        }
+
+        $validRows[] = $row;
+    }
+
+    if (count($validRows) === 0) {
+        http_response_code(422);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Preencha pelo menos uma linha da grade.'
+        ]);
+        exit;
+    }
+
+    $pdo->beginTransaction();
+
+    try {
+        foreach ($validRows as $row) {
+            insertRow($pdo, $section, $schema, $row, $userId);
+        }
+
+        $pdo->commit();
+    } catch (Throwable $error) {
+        $pdo->rollBack();
+        throw $error;
+    }
+
+    return count($validRows);
+}
+
+function saveSingleRow(PDO $pdo, string $section, array $schema, array $required, array $row, int $userId): string
+{
+    foreach ($required as $field) {
+        if (trim($row[$field] ?? '') === '') {
             http_response_code(422);
             echo json_encode([
                 'success' => false,
@@ -54,7 +141,14 @@ try {
         }
     }
 
-    $columns = array_merge(['usuario_id'], $schemas[$section]);
+    insertRow($pdo, $section, $schema, $row, $userId);
+
+    return $pdo->lastInsertId();
+}
+
+function insertRow(PDO $pdo, string $section, array $schema, array $row, int $userId): void
+{
+    $columns = array_merge(['usuario_id'], $schema);
     $placeholders = array_map(fn($column) => ':' . $column, $columns);
     $sql = sprintf(
         'INSERT INTO %s (%s) VALUES (%s)',
@@ -66,26 +160,25 @@ try {
     $params = [];
     foreach ($columns as $column) {
         if ($column === 'usuario_id') {
-            $params[':' . $column] = (int) $_SESSION['user']['id'];
+            $params[':' . $column] = $userId;
             continue;
         }
 
-        $value = trim($_POST[$column] ?? '');
+        $value = trim($row[$column] ?? '');
         $params[':' . $column] = $value === '' ? null : $value;
     }
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
+}
 
-    echo json_encode([
-        'success' => true,
-        'message' => 'Registro salvo com sucesso.',
-        'id' => $pdo->lastInsertId()
-    ]);
-} catch (Throwable $error) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Erro ao salvar: ' . $error->getMessage()
-    ]);
+function rowIsEmpty(array $row, array $schema): bool
+{
+    foreach ($schema as $field) {
+        if (trim($row[$field] ?? '') !== '') {
+            return false;
+        }
+    }
+
+    return true;
 }
