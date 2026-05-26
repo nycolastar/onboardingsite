@@ -2,6 +2,8 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
+session_start();
+
 require_once '../config/db.php';
 
 $schemas = [
@@ -33,6 +35,15 @@ $required = [
 ];
 
 try {
+    if (($_SESSION['role'] ?? '') !== 'user' || empty($_SESSION['user']['id'])) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Faca login com seu PIN para salvar as informacoes.'
+        ]);
+        exit;
+    }
+
     $section = $_POST['section'] ?? '';
 
     if (!isset($schemas[$section])) {
@@ -55,7 +66,7 @@ try {
         }
     }
 
-    $columns = $schemas[$section];
+    $columns = array_merge(['usuario_id'], $schemas[$section]);
     $placeholders = array_map(fn($column) => ':' . $column, $columns);
     $sql = sprintf(
         'INSERT INTO %s (%s) VALUES (%s)',
@@ -66,6 +77,11 @@ try {
 
     $params = [];
     foreach ($columns as $column) {
+        if ($column === 'usuario_id') {
+            $params[':' . $column] = (int) $_SESSION['user']['id'];
+            continue;
+        }
+
         $value = trim($_POST[$column] ?? '');
         $params[':' . $column] = $value === '' ? null : $value;
     }
