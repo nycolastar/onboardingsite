@@ -22,6 +22,10 @@ No painel admin e possivel:
 
 Na area do cliente, o modo `Grade` permite preencher varias linhas da mesma aba antes de salvar. Linhas vazias sao ignoradas, e linhas parcialmente preenchidas ainda respeitam os campos obrigatorios.
 
+## Registros do cliente
+
+Abaixo dos formularios, o cliente ve os registros ja enviados na aba atual. O botao `Editar` carrega a linha no formulario individual para corrigir e salvar novamente.
+
 ## Abas da planilha mapeadas
 
 - Dados de Loja
@@ -48,6 +52,7 @@ Na area do cliente, o modo `Grade` permite preencher varias linhas da mesma aba 
 
 - `index.html`: interface com abas e formularios.
 - `backend/api/save_onboarding.php`: API unica para gravar cada aba em sua tabela.
+- `backend/api/user_records.php`: lista os registros ja enviados pelo cliente logado.
 - `backend/api/auth.php`: login, status da sessao e logout.
 - `backend/api/admin_users.php`: criacao de usuarios/PINs e painel de progresso.
 - `backend/api/admin_export.php`: exportacoes de Excel e SQL restritas ao admin.

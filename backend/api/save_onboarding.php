@@ -65,7 +65,21 @@ try {
         exit;
     }
 
-    $savedId = saveSingleRow($pdo, $section, $schemas[$section], $required[$section], $_POST, (int) $_SESSION['user']['id']);
+    $userId = (int) $_SESSION['user']['id'];
+    $recordId = (int) ($_POST['record_id'] ?? 0);
+
+    if ($recordId > 0) {
+        updateSingleRow($pdo, $section, $schemas[$section], $required[$section], $_POST, $userId, $recordId);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Registro atualizado com sucesso.',
+            'id' => $recordId
+        ]);
+        exit;
+    }
+
+    $savedId = saveSingleRow($pdo, $section, $schemas[$section], $required[$section], $_POST, $userId);
 
     echo json_encode([
         'success' => true,
@@ -100,6 +114,8 @@ function saveRows(PDO $pdo, string $section, array $schema, array $required, arr
             }
         }
 
+        normalizeAndValidateNumericFields($row);
+
         $validRows[] = $row;
     }
 
@@ -130,20 +146,53 @@ function saveRows(PDO $pdo, string $section, array $schema, array $required, arr
 
 function saveSingleRow(PDO $pdo, string $section, array $schema, array $required, array $row, int $userId): string
 {
-    foreach ($required as $field) {
-        if (trim($row[$field] ?? '') === '') {
-            http_response_code(422);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Preencha os campos obrigatorios.'
-            ]);
-            exit;
-        }
-    }
+    validateRequired($required, $row);
+    normalizeAndValidateNumericFields($row);
 
     insertRow($pdo, $section, $schema, $row, $userId);
 
     return $pdo->lastInsertId();
+}
+
+function updateSingleRow(PDO $pdo, string $section, array $schema, array $required, array $row, int $userId, int $recordId): void
+{
+    validateRequired($required, $row);
+    normalizeAndValidateNumericFields($row);
+
+    $exists = $pdo->prepare("SELECT COUNT(*) FROM {$section} WHERE id = :id AND usuario_id = :usuario_id");
+    $exists->execute([
+        ':id' => $recordId,
+        ':usuario_id' => $userId
+    ]);
+
+    if ((int) $exists->fetchColumn() === 0) {
+        http_response_code(404);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Registro nao encontrado para este usuario.'
+        ]);
+        exit;
+    }
+
+    $assignments = array_map(fn($column) => $column . ' = :' . $column, $schema);
+    $sql = sprintf(
+        'UPDATE %s SET %s WHERE id = :id AND usuario_id = :usuario_id',
+        $section,
+        implode(', ', $assignments)
+    );
+
+    $params = [
+        ':id' => $recordId,
+        ':usuario_id' => $userId
+    ];
+
+    foreach ($schema as $column) {
+        $value = trim($row[$column] ?? '');
+        $params[':' . $column] = $value === '' ? null : $value;
+    }
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
 }
 
 function insertRow(PDO $pdo, string $section, array $schema, array $row, int $userId): void
@@ -181,4 +230,52 @@ function rowIsEmpty(array $row, array $schema): bool
     }
 
     return true;
+}
+
+function validateRequired(array $required, array $row): void
+{
+    foreach ($required as $field) {
+        if (trim($row[$field] ?? '') === '') {
+            http_response_code(422);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Preencha os campos obrigatorios.'
+            ]);
+            exit;
+        }
+    }
+}
+
+function normalizeAndValidateNumericFields(array &$row): void
+{
+    $rules = [
+        'cnpj' => ['length' => 14, 'label' => 'CNPJ'],
+        'cnpj_industria' => ['length' => 14, 'label' => 'CNPJ Industria'],
+        'cep' => ['length' => 8, 'label' => 'CEP'],
+    ];
+
+    foreach ($rules as $field => $rule) {
+        if (!array_key_exists($field, $row)) {
+            continue;
+        }
+
+        $value = trim($row[$field] ?? '');
+
+        if ($value === '') {
+            continue;
+        }
+
+        $digits = preg_replace('/\D/', '', $value);
+
+        if (strlen($digits) !== $rule['length']) {
+            http_response_code(422);
+            echo json_encode([
+                'success' => false,
+                'message' => $rule['label'] . ' deve ter ' . $rule['length'] . ' digitos.'
+            ]);
+            exit;
+        }
+
+        $row[$field] = $digits;
+    }
 }

@@ -215,6 +215,32 @@
       color: var(--muted);
     }
 
+    .icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--brand);
+      flex: 0 0 auto;
+      padding: 3px;
+    }
+
+    .icon-button:hover {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .icon-button img {
+      width: 34px;
+      height: 28px;
+      object-fit: contain;
+      display: block;
+    }
+
     pre {
       white-space: pre-wrap;
       background: #101828;
@@ -357,6 +383,16 @@
               </form>
             </div>
             <div id="resultado" class="mt-4"></div>
+            <div class="mt-4" id="clientRecordsPanel">
+              <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-2">
+                <div>
+                  <div class="section-title">Informacoes ja enviadas</div>
+                  <p class="section-description" id="clientRecordsDescription"></p>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" id="refreshClientRecordsButton" type="button">Atualizar tabela</button>
+              </div>
+              <div id="clientRecordsContent"></div>
+            </div>
           </div>
         </section>
       </div>
@@ -372,12 +408,12 @@
         description: 'Campos da aba Nome Fantasia, CNPJ, razao social, sigla, formato, bandeira e endereco.',
         fields: [
           { name: 'nome_fantasia', label: 'Nome Fantasia', required: true },
-          { name: 'cnpj', label: 'CNPJ' },
+          { name: 'cnpj', label: 'CNPJ', numeric: true, maxLength: 14 },
           { name: 'razao_social', label: 'Razao Social', full: true },
           { name: 'sigla_loja', label: 'Sigla - Loja' },
           { name: 'formato', label: 'Formato' },
           { name: 'bandeira', label: 'Bandeira' },
-          { name: 'cep', label: 'CEP' },
+          { name: 'cep', label: 'CEP', numeric: true, maxLength: 8 },
           { name: 'endereco', label: 'Endereco', full: true },
           { name: 'complemento', label: 'Complemento' },
           { name: 'regiao', label: 'Regiao' }
@@ -424,7 +460,7 @@
         badge: 'Industrias',
         description: 'Cadastro usado quando nao houver integracao com ERP.',
         fields: [
-          { name: 'cnpj_industria', label: 'CNPJ Industria', required: true },
+          { name: 'cnpj_industria', label: 'CNPJ Industria', required: true, numeric: true, maxLength: 14 },
           { name: 'razao_social', label: 'Razao Social', full: true },
           { name: 'nome_fantasia', label: 'Nome Fantasia' },
           { name: 'codigo_interno', label: 'Codigo Interno' },
@@ -522,10 +558,14 @@
     const bulkTable = document.getElementById('bulkTable');
     const addBulkRowButton = document.getElementById('addBulkRowButton');
     const clearBulkButton = document.getElementById('clearBulkButton');
+    const clientRecordsDescription = document.getElementById('clientRecordsDescription');
+    const clientRecordsContent = document.getElementById('clientRecordsContent');
+    const refreshClientRecordsButton = document.getElementById('refreshClientRecordsButton');
     const resultBox = document.getElementById('resultado');
     let activeSection = sections[0];
     let currentUser = null;
     let entryMode = 'single';
+    let clientRows = [];
 
     function setView(view, data = {}) {
       loginView.hidden = view !== 'login';
@@ -607,6 +647,10 @@
             id="${field.name}"
             name="${field.name}"
             type="${field.type || 'text'}"
+            ${field.numeric ? 'inputmode="numeric" pattern="[0-9]*"' : ''}
+            ${field.maxLength ? `maxlength="${field.maxLength}"` : ''}
+            ${field.maxLength ? `data-max-length="${field.maxLength}"` : ''}
+            ${field.numeric ? 'data-numeric="true"' : ''}
             ${field.step ? `step="${field.step}"` : ''}
             ${requiredAttr}>
         </div>
@@ -634,9 +678,11 @@
 
       form.innerHTML = `
         <input type="hidden" name="section" value="${section.id}">
+        <input type="hidden" name="record_id" value="">
         ${driveLinkBlock}
         ${section.fields.map(fieldTemplate).join('')}
         <div class="col-12 d-flex flex-column flex-sm-row gap-2 justify-content-end mt-2">
+          <button type="button" class="btn btn-outline-secondary" data-cancel-edit hidden>Cancelar edicao</button>
           <button type="reset" class="btn btn-outline-secondary">Limpar</button>
           <button type="submit" class="btn btn-primary">Salvar registro</button>
         </div>
@@ -647,6 +693,94 @@
       } else {
         renderBulkGrid(section);
       }
+    }
+
+    async function loadClientRecords() {
+      if (!currentUser) return;
+
+      clientRecordsDescription.textContent = `Registros salvos em ${activeSection.label}.`;
+      clientRecordsContent.innerHTML = '<div class="alert alert-info mb-0">Carregando registros...</div>';
+
+      try {
+        const result = await requestJson(`backend/api/user_records.php?section=${encodeURIComponent(activeSection.id)}`);
+        clientRows = result.rows;
+        renderClientRecords(result.columns, result.rows);
+      } catch (error) {
+        clientRecordsContent.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    }
+
+    function renderClientRecords(columns, rows) {
+      if (rows.length === 0) {
+        clientRecordsContent.innerHTML = '<div class="alert alert-secondary mb-0">Nenhum registro enviado nesta aba ainda.</div>';
+        return;
+      }
+
+      const fields = getDisplayFields(activeSection.id);
+
+      clientRecordsContent.innerHTML = `
+        <div class="records-table-wrap">
+          <table class="table table-sm table-striped records-table">
+            <thead>
+              <tr>
+                <th>Acoes</th>
+                ${fields.map(field => `<th>${escapeHtml(field.label)}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((row, index) => `
+                <tr>
+                  <td><button class="icon-button" type="button" data-edit-client-row="${index}" title="Editar" aria-label="Editar registro"><img src="logo.svg" alt=""></button></td>
+                  ${fields.map(field => `<td>${escapeHtml(row[field.name] ?? '')}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function getDisplayFields(sectionId) {
+      const section = sections.find(item => item.id === sectionId) || activeSection;
+      return section.fields;
+    }
+
+    function editClientRow(index) {
+      const row = clientRows[index];
+      if (!row) return;
+
+      setEntryMode('single');
+      form.querySelector('[name="record_id"]').value = row.id;
+      activeSection.fields.forEach(field => {
+        const input = form.querySelector(`[name="${field.name}"]`);
+        if (input) {
+          input.value = row[field.name] ?? '';
+        }
+      });
+
+      const cancelButton = form.querySelector('[data-cancel-edit]');
+      if (cancelButton) {
+        cancelButton.hidden = false;
+      }
+
+      resultBox.innerHTML = '<div class="alert alert-info mb-0">Editando registro existente. Salve para atualizar.</div>';
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelEditMode() {
+      form.reset();
+      const recordInput = form.querySelector('[name="record_id"]');
+      const cancelButton = form.querySelector('[data-cancel-edit]');
+
+      if (recordInput) {
+        recordInput.value = '';
+      }
+
+      if (cancelButton) {
+        cancelButton.hidden = true;
+      }
+
+      resultBox.innerHTML = '';
     }
 
     function canUseBulk(section) {
@@ -701,7 +835,7 @@
     }
 
     function bulkFieldTemplate(field) {
-      const baseAttrs = `class="form-control form-control-sm" data-field="${field.name}" ${field.step ? `step="${field.step}"` : ''}`;
+      const baseAttrs = `class="form-control form-control-sm" data-field="${field.name}" ${field.step ? `step="${field.step}"` : ''} ${field.numeric ? 'inputmode="numeric" pattern="[0-9]*" data-numeric="true"' : ''} ${field.maxLength ? `maxlength="${field.maxLength}" data-max-length="${field.maxLength}"` : ''}`;
 
       if (field.type === 'select') {
         const options = ['<option value=""></option>']
@@ -739,6 +873,14 @@
         });
         return data;
       });
+    }
+
+    function normalizeNumericInput(input) {
+      if (!input?.dataset?.numeric) return;
+
+      const maxLength = Number(input.dataset.maxLength || 0);
+      const digits = input.value.replace(/\D/g, '');
+      input.value = maxLength > 0 ? digits.slice(0, maxLength) : digits;
     }
 
     async function loadUsers() {
@@ -818,18 +960,20 @@
     }
 
     function renderRecordsTable(section) {
+      const fields = getDisplayFields(section.section);
+
       return `
         <div class="records-table-wrap">
           <table class="table table-sm table-striped records-table">
             <thead>
               <tr>
-                ${section.columns.map(column => `<th>${escapeHtml(column)}</th>`).join('')}
+                ${fields.map(field => `<th>${escapeHtml(field.label)}</th>`).join('')}
               </tr>
             </thead>
             <tbody>
               ${section.rows.map(row => `
                 <tr>
-                  ${section.columns.map(column => `<td>${escapeHtml(row[column] ?? '')}</td>`).join('')}
+                  ${fields.map(field => `<td>${escapeHtml(row[field.name] ?? '')}</td>`).join('')}
                 </tr>
               `).join('')}
             </tbody>
@@ -896,6 +1040,7 @@
         } else {
           setView('user', { user: result.user });
           renderSection(activeSection);
+          await loadClientRecords();
         }
       } catch (error) {
         loginResult.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
@@ -979,6 +1124,29 @@
       const section = sections.find(item => item.id === button.dataset.section);
       renderSection(section);
       setEntryMode(entryMode);
+      loadClientRecords();
+    });
+
+    refreshClientRecordsButton.addEventListener('click', () => {
+      loadClientRecords();
+    });
+
+    clientRecordsContent.addEventListener('click', event => {
+      const button = event.target.closest('[data-edit-client-row]');
+      if (!button) return;
+
+      editClientRow(Number(button.dataset.editClientRow));
+    });
+
+    form.addEventListener('click', event => {
+      const button = event.target.closest('[data-cancel-edit]');
+      if (!button) return;
+
+      cancelEditMode();
+    });
+
+    form.addEventListener('input', event => {
+      normalizeNumericInput(event.target);
     });
 
     singleModeButton.addEventListener('click', () => {
@@ -1016,6 +1184,10 @@
       renumberBulkRows();
     });
 
+    bulkTable.addEventListener('input', event => {
+      normalizeNumericInput(event.target);
+    });
+
     form.addEventListener('submit', async event => {
       event.preventDefault();
       resultBox.innerHTML = '<div class="alert alert-info mb-0">Salvando...</div>';
@@ -1030,6 +1202,11 @@
           <div class="alert alert-success mb-0">${result.message}</div>
         `;
         form.reset();
+        const cancelButton = form.querySelector('[data-cancel-edit]');
+        if (cancelButton) {
+          cancelButton.hidden = true;
+        }
+        await loadClientRecords();
       } catch (error) {
         resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
       }
@@ -1051,6 +1228,7 @@
 
         resultBox.innerHTML = `<div class="alert alert-success mb-0">${result.message}</div>`;
         renderBulkGrid(activeSection);
+        await loadClientRecords();
       } catch (error) {
         resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
       }
@@ -1077,6 +1255,7 @@
 
         setView('user', { user: result.user });
         renderSection(activeSection);
+        await loadClientRecords();
       } catch (error) {
         setView('login');
       }
