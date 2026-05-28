@@ -13,51 +13,49 @@ try {
     ensureSectionStatusTable($pdo);
 
     if (($_SESSION['role'] ?? '') !== 'user' || empty($_SESSION['user']['id'])) {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Faca login com seu PIN para ver as informacoes.'
-        ]);
-        exit;
+        respond(401, false, 'Faca login com seu PIN para confirmar a aba.');
     }
 
-    $section = $_GET['section'] ?? '';
+    $action = $_GET['action'] ?? $_POST['action'] ?? '';
+    $section = $_POST['section'] ?? '';
+
+    if ($action !== 'finalize') {
+        respond(400, false, 'Acao invalida.');
+    }
 
     if (!isset($schemas[$section])) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Aba de cadastro invalida.'
-        ]);
-        exit;
+        respond(400, false, 'Aba de cadastro invalida.');
     }
 
-    $columns = array_merge(['id'], $schemas[$section], ['created_at']);
-    $sql = sprintf(
-        'SELECT %s FROM %s WHERE usuario_id = :usuario_id ORDER BY id DESC',
-        implode(', ', $columns),
-        $section
-    );
-
-    $stmt = $pdo->prepare($sql);
     $userId = (int) $_SESSION['user']['id'];
-    $stmt->execute([':usuario_id' => $userId]);
+
+    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM {$section} WHERE usuario_id = :usuario_id");
+    $countStmt->execute([':usuario_id' => $userId]);
+
+    if ((int) $countStmt->fetchColumn() === 0) {
+        respond(422, false, 'Envie pelo menos um registro antes de confirmar a aba.');
+    }
+
+    $stmt = $pdo->prepare(
+        'INSERT INTO onboarding_section_status (usuario_id, section_key, finalized_at)
+         VALUES (:usuario_id, :section_key, CURRENT_TIMESTAMP)
+         ON DUPLICATE KEY UPDATE finalized_at = CURRENT_TIMESTAMP'
+    );
+    $stmt->execute([
+        ':usuario_id' => $userId,
+        ':section_key' => $section
+    ]);
 
     echo json_encode([
         'success' => true,
-        'columns' => $columns,
+        'message' => 'Aba finalizada com sucesso.',
         'status' => [
             'section' => $section,
             'finalized_at' => findFinalizedAt($pdo, $userId, $section)
-        ],
-        'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)
+        ]
     ]);
 } catch (Throwable $error) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Erro ao carregar registros: ' . $error->getMessage()
-    ]);
+    respond(500, false, 'Erro ao confirmar: ' . $error->getMessage());
 }
 
 function ensureSectionStatusTable(PDO $pdo): void
@@ -86,4 +84,14 @@ function findFinalizedAt(PDO $pdo, int $userId, string $section): ?string
 
     $value = $stmt->fetchColumn();
     return $value === false ? null : (string) $value;
+}
+
+function respond(int $status, bool $success, string $message): void
+{
+    http_response_code($status);
+    echo json_encode([
+        'success' => $success,
+        'message' => $message
+    ]);
+    exit;
 }

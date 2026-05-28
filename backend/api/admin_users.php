@@ -11,6 +11,7 @@ $sections = $onboardingSections;
 
 try {
     requireAdmin();
+    ensureSectionStatusTable($pdo);
 
     $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 
@@ -122,26 +123,31 @@ function listUsers(PDO $pdo, array $sections): array
     foreach ($users as &$user) {
         $user['id'] = (int) $user['id'];
         $user['progress'] = [];
-        $sent = 0;
+        $completed = 0;
 
         foreach ($sections as $table => $section) {
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM {$table} WHERE usuario_id = :usuario_id");
             $stmt->execute([':usuario_id' => $user['id']]);
             $count = (int) $stmt->fetchColumn();
 
-            if ($count > 0) {
-                $sent++;
+            $finalizedAt = findFinalizedAt($pdo, $user['id'], $table);
+            $status = $finalizedAt !== null ? 'completed' : ($count > 0 ? 'sent' : 'missing');
+
+            if ($status === 'completed') {
+                $completed++;
             }
 
             $user['progress'][] = [
                 'section' => $table,
                 'label' => $section['label'],
                 'count' => $count,
-                'sent' => $count > 0
+                'sent' => $count > 0,
+                'status' => $status,
+                'finalized_at' => $finalizedAt
             ];
         }
 
-        $user['completed'] = $sent;
+        $user['completed'] = $completed;
         $user['total'] = count($sections);
     }
 
@@ -181,11 +187,40 @@ function listRecords(PDO $pdo, array $sections, int $userId): array
             'section' => $table,
             'label' => $section['label'],
             'columns' => $columns,
+            'finalized_at' => findFinalizedAt($pdo, $userId, $table),
             'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)
         ];
     }
 
     return $records;
+}
+
+function ensureSectionStatusTable(PDO $pdo): void
+{
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS onboarding_section_status (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario_id INT NOT NULL,
+            section_key VARCHAR(80) NOT NULL,
+            finalized_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_onboarding_section_status (usuario_id, section_key),
+            CONSTRAINT fk_onboarding_section_status_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_acesso(id) ON DELETE CASCADE
+        )'
+    );
+}
+
+function findFinalizedAt(PDO $pdo, int $userId, string $section): ?string
+{
+    $stmt = $pdo->prepare('SELECT finalized_at FROM onboarding_section_status WHERE usuario_id = :usuario_id AND section_key = :section_key');
+    $stmt->execute([
+        ':usuario_id' => $userId,
+        ':section_key' => $section
+    ]);
+
+    $value = $stmt->fetchColumn();
+    return $value === false ? null : (string) $value;
 }
 
 function generateUniquePin(PDO $pdo): string

@@ -23,6 +23,8 @@ $required = [
 ];
 
 try {
+    ensureSectionStatusTable($pdo);
+
     if (($_SESSION['role'] ?? '') !== 'user' || empty($_SESSION['user']['id'])) {
         http_response_code(401);
         echo json_encode([
@@ -56,6 +58,7 @@ try {
         }
 
         $saved = saveRows($pdo, $section, $schemas[$section], $required[$section], $rows, (int) $_SESSION['user']['id']);
+        markSectionInProgress($pdo, (int) $_SESSION['user']['id'], $section);
 
         echo json_encode([
             'success' => true,
@@ -70,6 +73,7 @@ try {
 
     if ($recordId > 0) {
         updateSingleRow($pdo, $section, $schemas[$section], $required[$section], $_POST, $userId, $recordId);
+        markSectionInProgress($pdo, $userId, $section);
 
         echo json_encode([
             'success' => true,
@@ -80,6 +84,7 @@ try {
     }
 
     $savedId = saveSingleRow($pdo, $section, $schemas[$section], $required[$section], $_POST, $userId);
+    markSectionInProgress($pdo, $userId, $section);
 
     echo json_encode([
         'success' => true,
@@ -91,6 +96,31 @@ try {
     echo json_encode([
         'success' => false,
         'message' => 'Erro ao salvar: ' . $error->getMessage()
+    ]);
+}
+
+function ensureSectionStatusTable(PDO $pdo): void
+{
+    $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS onboarding_section_status (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario_id INT NOT NULL,
+            section_key VARCHAR(80) NOT NULL,
+            finalized_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_onboarding_section_status (usuario_id, section_key),
+            CONSTRAINT fk_onboarding_section_status_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_acesso(id) ON DELETE CASCADE
+        )'
+    );
+}
+
+function markSectionInProgress(PDO $pdo, int $userId, string $section): void
+{
+    $stmt = $pdo->prepare('DELETE FROM onboarding_section_status WHERE usuario_id = :usuario_id AND section_key = :section_key');
+    $stmt->execute([
+        ':usuario_id' => $userId,
+        ':section_key' => $section
     ]);
 }
 

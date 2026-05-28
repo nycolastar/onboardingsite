@@ -16,6 +16,7 @@
       --surface: #f5f7fa;
       --ok: #067647;
       --warn: #b54708;
+      --danger: #b42318;
     }
 
     body {
@@ -126,15 +127,57 @@
     }
 
     .status-chip.sent {
+      border-color: #fedf89;
+      background: #fffaeb;
+      color: var(--warn);
+    }
+
+    .status-chip.missing {
+      border-color: #fecdca;
+      background: #fef3f2;
+      color: var(--danger);
+    }
+
+    .status-chip.completed {
       border-color: #abefc6;
       background: #ecfdf3;
       color: var(--ok);
     }
 
-    .status-chip.missing {
+    .section-state {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .45rem .65rem;
+      font-weight: 700;
+      font-size: .88rem;
+      white-space: nowrap;
+    }
+
+    .section-state.missing {
+      border-color: #fecdca;
+      background: #fef3f2;
+      color: var(--danger);
+    }
+
+    .section-state.sent {
       border-color: #fedf89;
       background: #fffaeb;
       color: var(--warn);
+    }
+
+    .section-state.completed {
+      border-color: #abefc6;
+      background: #ecfdf3;
+      color: var(--ok);
+    }
+
+    .checkbox-group {
+      display: grid;
+      gap: .45rem;
+    }
+
+    .checkbox-group .form-check {
+      margin-bottom: 0;
     }
 
     .admin-actions {
@@ -389,7 +432,11 @@
                   <div class="section-title">Informacoes ja enviadas</div>
                   <p class="section-description" id="clientRecordsDescription"></p>
                 </div>
-                <button class="btn btn-outline-secondary btn-sm" id="refreshClientRecordsButton" type="button">Atualizar tabela</button>
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+                  <span class="section-state missing" id="clientSectionState">Nao enviado</span>
+                  <button class="btn btn-success btn-sm" id="confirmSectionButton" type="button">Confirmar finalizado</button>
+                  <button class="btn btn-outline-secondary btn-sm" id="refreshClientRecordsButton" type="button">Atualizar tabela</button>
+                </div>
               </div>
               <div id="clientRecordsContent"></div>
             </div>
@@ -478,7 +525,7 @@
         badge: 'Dados Bancarios',
         description: 'Tipos de pagamento aceitos no projeto.',
         fields: [
-          { name: 'tipo_pagamento', label: 'Tipo de pagamento', required: true, type: 'select', options: ['Bonificacao', 'Deposito', 'Pix', 'Abatimento em Duplicata'] },
+          { name: 'tipo_pagamento', label: 'Tipo de pagamento', required: true, type: 'checkbox-group', options: ['Bonificacao', 'Deposito', 'Pix', 'Abatimento em Duplicata'], full: true, selectAll: true },
           { name: 'observacoes', label: 'Observacoes', type: 'textarea', full: true }
         ]
       },
@@ -561,6 +608,8 @@
     const clientRecordsDescription = document.getElementById('clientRecordsDescription');
     const clientRecordsContent = document.getElementById('clientRecordsContent');
     const refreshClientRecordsButton = document.getElementById('refreshClientRecordsButton');
+    const clientSectionState = document.getElementById('clientSectionState');
+    const confirmSectionButton = document.getElementById('confirmSectionButton');
     const resultBox = document.getElementById('resultado');
     let activeSection = sections[0];
     let currentUser = null;
@@ -639,6 +688,33 @@
         `;
       }
 
+      if (field.type === 'checkbox-group') {
+        return `
+          <div class="${colClass}">
+            <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-2">
+              <span class="form-label ${requiredClass} mb-0">${field.label}</span>
+              ${field.selectAll ? `
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="${field.name}_all" data-select-all="${field.name}">
+                  <label class="form-check-label" for="${field.name}_all">Selecionar todos</label>
+                </div>
+              ` : ''}
+            </div>
+            <div class="checkbox-group" role="group" aria-label="${escapeHtml(field.label)}">
+              ${field.options.map((option, index) => {
+                const id = `${field.name}_${index}`;
+                return `
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="${id}" name="${field.name}[]" value="${escapeHtml(option)}" data-checkbox-group="${field.name}" ${field.required ? 'data-required-group="true"' : ''}>
+                    <label class="form-check-label" for="${id}">${escapeHtml(option)}</label>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
       return `
         <div class="${colClass}">
           <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
@@ -704,10 +780,32 @@
       try {
         const result = await requestJson(`backend/api/user_records.php?section=${encodeURIComponent(activeSection.id)}`);
         clientRows = result.rows;
+        renderClientSectionStatus(result.status, result.rows.length);
         renderClientRecords(result.columns, result.rows);
       } catch (error) {
         clientRecordsContent.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
       }
+    }
+
+    function getSectionStatus(status, count) {
+      if (status?.finalized_at) {
+        return { key: 'completed', label: 'Finalizado' };
+      }
+
+      if (count > 0) {
+        return { key: 'sent', label: 'Em preenchimento' };
+      }
+
+      return { key: 'missing', label: 'Nao enviado' };
+    }
+
+    function renderClientSectionStatus(status, count) {
+      const state = getSectionStatus(status, count);
+      clientSectionState.className = `section-state ${state.key}`;
+      clientSectionState.textContent = state.label;
+      confirmSectionButton.hidden = state.key === 'completed';
+      confirmSectionButton.disabled = count === 0;
+      confirmSectionButton.textContent = 'Confirmar finalizado';
     }
 
     function renderClientRecords(columns, rows) {
@@ -752,6 +850,15 @@
       setEntryMode('single');
       form.querySelector('[name="record_id"]').value = row.id;
       activeSection.fields.forEach(field => {
+        if (field.type === 'checkbox-group') {
+          const values = String(row[field.name] ?? '').split(',').map(value => value.trim()).filter(Boolean);
+          form.querySelectorAll(`[data-checkbox-group="${field.name}"]`).forEach(input => {
+            input.checked = values.includes(input.value);
+          });
+          syncSelectAll(field.name);
+          return;
+        }
+
         const input = form.querySelector(`[name="${field.name}"]`);
         if (input) {
           input.value = row[field.name] ?? '';
@@ -843,6 +950,27 @@
         return `<select class="form-select form-select-sm" data-field="${field.name}">${options.join('')}</select>`;
       }
 
+      if (field.type === 'checkbox-group') {
+        const allId = `${field.name}_all_${Math.random().toString(36).slice(2)}`;
+        return `
+          <div class="checkbox-group">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="${allId}" data-bulk-select-all="${field.name}">
+              <label class="form-check-label small" for="${allId}">Selecionar todos</label>
+            </div>
+            ${field.options.map((option, index) => {
+              const id = `${field.name}_${index}_${Math.random().toString(36).slice(2)}`;
+              return `
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="${id}" value="${escapeHtml(option)}" data-field="${field.name}" data-checkbox-field="true">
+                  <label class="form-check-label small" for="${id}">${escapeHtml(option)}</label>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
       if (field.type === 'textarea') {
         return `<textarea ${baseAttrs} rows="1"></textarea>`;
       }
@@ -869,6 +997,13 @@
       return Array.from(bulkTable.querySelectorAll('[data-row]')).map(row => {
         const data = {};
         activeSection.fields.forEach(field => {
+          if (field.type === 'checkbox-group') {
+            data[field.name] = Array.from(row.querySelectorAll(`[data-field="${field.name}"]:checked`))
+              .map(input => input.value.trim())
+              .join(', ');
+            return;
+          }
+
           data[field.name] = row.querySelector(`[data-field="${field.name}"]`)?.value.trim() || '';
         });
         return data;
@@ -906,7 +1041,7 @@
             </div>
             <div class="text-md-end">
               <div class="pin-code">${escapeHtml(user.pin)}</div>
-              <div class="small text-muted">${user.completed}/${user.total} abas enviadas</div>
+              <div class="small text-muted">${user.completed}/${user.total} abas finalizadas</div>
             </div>
           </div>
           <div class="admin-actions mb-3">
@@ -917,9 +1052,9 @@
           </div>
           <div class="status-grid">
             ${user.progress.map(item => `
-              <div class="status-chip ${item.sent ? 'sent' : 'missing'}">
+              <div class="status-chip ${item.status}">
                 <strong>${escapeHtml(item.label)}</strong><br>
-                ${item.sent ? `${item.count} registro(s)` : 'Pendente'}
+                ${item.status === 'completed' ? 'Finalizado' : (item.sent ? `${item.count} registro(s)` : 'Pendente')}
               </div>
             `).join('')}
           </div>
@@ -950,7 +1085,10 @@
         <section class="mb-4">
           <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-2">
             <h3 class="h6 mb-0">${escapeHtml(section.label)}</h3>
-            <span class="badge text-bg-secondary">${section.rows.length} registro(s)</span>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="section-state ${getSectionStatus({ finalized_at: section.finalized_at }, section.rows.length).key}">${getSectionStatus({ finalized_at: section.finalized_at }, section.rows.length).label}</span>
+              <span class="badge text-bg-secondary">${section.rows.length} registro(s)</span>
+            </div>
           </div>
           ${section.rows.length === 0 ? '<div class="alert alert-warning mb-0">Nenhum registro enviado nesta aba.</div>' : renderRecordsTable(section)}
         </section>
@@ -1001,6 +1139,61 @@
       });
 
       await loadUsers();
+    }
+
+    async function confirmActiveSection() {
+      if (!currentUser || clientRows.length === 0) return;
+
+      confirmSectionButton.disabled = true;
+      confirmSectionButton.textContent = 'Confirmando...';
+
+      try {
+        const formData = new FormData();
+        formData.append('section', activeSection.id);
+
+        const result = await requestJson('backend/api/section_status.php?action=finalize', {
+          method: 'POST',
+          body: formData
+        });
+
+        renderClientSectionStatus(result.status, clientRows.length);
+        resultBox.innerHTML = '<div class="alert alert-success mb-0">Aba marcada como finalizada.</div>';
+      } catch (error) {
+        resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+        renderClientSectionStatus(null, clientRows.length);
+      }
+    }
+
+    function syncSelectAll(groupName) {
+      const boxes = Array.from(form.querySelectorAll(`[data-checkbox-group="${groupName}"]`));
+      const selectAll = form.querySelector(`[data-select-all="${groupName}"]`);
+      if (!selectAll || boxes.length === 0) return;
+
+      const checked = boxes.filter(input => input.checked).length;
+      selectAll.checked = checked === boxes.length;
+      selectAll.indeterminate = checked > 0 && checked < boxes.length;
+    }
+
+    function validateCheckboxGroups() {
+      const requiredGroups = new Set(Array.from(form.querySelectorAll('[data-required-group="true"]')).map(input => input.dataset.checkboxGroup));
+
+      for (const groupName of requiredGroups) {
+        if (!form.querySelector(`[data-checkbox-group="${groupName}"]:checked`)) {
+      return false;
+    }
+
+    function syncBulkSelectAll(row, groupName) {
+      const boxes = Array.from(row.querySelectorAll(`[data-field="${groupName}"]`));
+      const selectAll = row.querySelector(`[data-bulk-select-all="${groupName}"]`);
+      if (!selectAll || boxes.length === 0) return;
+
+      const checked = boxes.filter(input => input.checked).length;
+      selectAll.checked = checked === boxes.length;
+      selectAll.indeterminate = checked > 0 && checked < boxes.length;
+    }
+      }
+
+      return true;
     }
 
     function escapeHtml(value) {
@@ -1131,6 +1324,10 @@
       loadClientRecords();
     });
 
+    confirmSectionButton.addEventListener('click', () => {
+      confirmActiveSection();
+    });
+
     clientRecordsContent.addEventListener('click', event => {
       const button = event.target.closest('[data-edit-client-row]');
       if (!button) return;
@@ -1143,6 +1340,22 @@
       if (!button) return;
 
       cancelEditMode();
+    });
+
+    form.addEventListener('change', event => {
+      const selectAll = event.target.closest('[data-select-all]');
+      if (selectAll) {
+        form.querySelectorAll(`[data-checkbox-group="${selectAll.dataset.selectAll}"]`).forEach(input => {
+          input.checked = selectAll.checked;
+        });
+        syncSelectAll(selectAll.dataset.selectAll);
+        return;
+      }
+
+      const checkbox = event.target.closest('[data-checkbox-group]');
+      if (checkbox) {
+        syncSelectAll(checkbox.dataset.checkboxGroup);
+      }
     });
 
     form.addEventListener('input', event => {
@@ -1188,14 +1401,47 @@
       normalizeNumericInput(event.target);
     });
 
+    bulkTable.addEventListener('change', event => {
+      const selectAll = event.target.closest('[data-bulk-select-all]');
+      if (selectAll) {
+        const row = selectAll.closest('[data-row]');
+        row.querySelectorAll(`[data-field="${selectAll.dataset.bulkSelectAll}"]`).forEach(input => {
+          input.checked = selectAll.checked;
+        });
+        syncBulkSelectAll(row, selectAll.dataset.bulkSelectAll);
+        return;
+      }
+
+      const checkbox = event.target.closest('[data-checkbox-field]');
+      if (checkbox) {
+        syncBulkSelectAll(checkbox.closest('[data-row]'), checkbox.dataset.field);
+      }
+    });
+
     form.addEventListener('submit', async event => {
       event.preventDefault();
+      if (!validateCheckboxGroups()) {
+        resultBox.innerHTML = '<div class="alert alert-danger mb-0">Selecione pelo menos uma opcao obrigatoria.</div>';
+        return;
+      }
+
       resultBox.innerHTML = '<div class="alert alert-info mb-0">Salvando...</div>';
 
       try {
+        const formData = new FormData(form);
+        activeSection.fields.forEach(field => {
+          if (field.type === 'checkbox-group') {
+            formData.delete(`${field.name}[]`);
+            const value = Array.from(form.querySelectorAll(`[data-checkbox-group="${field.name}"]:checked`))
+              .map(input => input.value)
+              .join(', ');
+            formData.set(field.name, value);
+          }
+        });
+
         const result = await requestJson('backend/api/save_onboarding.php', {
           method: 'POST',
-          body: new FormData(form)
+          body: formData
         });
 
         resultBox.innerHTML = `
