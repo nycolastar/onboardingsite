@@ -4,7 +4,7 @@ Sistema simples em HTML, Bootstrap, PHP e MySQL para substituir a planilha de on
 
 ## Acesso
 
-- Admin: PIN `7X90K`
+- Admin: PIN 
 - Cliente: PIN gerado pelo admin no painel.
 - Link do Drive: informado pelo admin ao criar o usuario, usado na aba Planta de loja.
 
