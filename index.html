@@ -1,0 +1,2551 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onboarding</title>
+  <link rel="icon" type="image/svg+xml" href="assets/onboarding.svg">
+  <link rel="shortcut icon" type="image/svg+xml" href="assets/onboarding.svg">
+  <link rel="apple-touch-icon" href="assets/onboarding.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --roxo: #330167;
+      --amarelo: #f9cc3d;
+      --azul: #026ebd;
+      --rosa: #c90e67;
+      --branco: #ffffff;
+      --sombra: 0 4px 24px rgba(51, 1, 103, .10);
+      --sombra-hover: 0 10px 30px rgba(0, 0, 0, .12);
+      --bg-principal: #ffffff;
+      --bg-secundario: #f5f5f7;
+      --card-bg: #ffffff;
+      --texto-principal: #1a1a2e;
+      --texto-suave: #666680;
+      --borda: #e8e8ec;
+      --accent-color: #330167;
+      --header-bg: #ffffff;
+      --nav-text: #444460;
+      --brand: var(--roxo);
+      --brand-dark: #240044;
+      --brand-soft: #f0eaff;
+      --blue: var(--azul);
+      --blue-soft: #e0f0ff;
+      --yellow: var(--amarelo);
+      --yellow-dark: #d1a41d;
+      --pink: var(--rosa);
+      --ink: var(--texto-principal);
+      --muted: var(--texto-suave);
+      --line: var(--borda);
+      --surface: var(--bg-secundario);
+      --card: var(--card-bg);
+      --ok: #067647;
+      --warn: #b54708;
+      --danger: #b42318;
+    }
+
+    * {
+      letter-spacing: 0;
+      scrollbar-color: var(--brand) #f5f2f8;
+      scrollbar-width: thin;
+    }
+
+    *::-webkit-scrollbar {
+      height: 12px;
+      width: 12px;
+      background-color: #f5f2f8;
+    }
+
+    *::-webkit-scrollbar-track {
+      background-color: #f5f2f8;
+      border-radius: 10px;
+      box-shadow: inset 0 0 6px rgba(59, 0, 109, .08);
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background-color: var(--brand);
+      border: 3px solid #f5f2f8;
+      border-radius: 10px;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, .12);
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+      background-color: var(--brand-dark);
+    }
+
+    body {
+      background:
+        radial-gradient(circle, rgba(249, 204, 61, .15) 1px, transparent 1px) 0 0 / 28px 28px,
+        linear-gradient(180deg, var(--bg-principal) 0, var(--bg-secundario) 300px);
+      color: var(--ink);
+      font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    .section-title,
+    .form-label,
+    .btn,
+    .badge {
+      font-family: "Montserrat", "Poppins", sans-serif;
+    }
+
+    .app-shell {
+      max-width: 1280px;
+    }
+
+    .topbar {
+      background: var(--header-bg);
+      border-bottom: 3px solid var(--yellow);
+      box-shadow: var(--sombra);
+      color: var(--ink);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .topbar h1 {
+      color: var(--ink);
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .topbar small {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .brand-logo {
+      border-radius: 0;
+      height: 44px;
+      width: 150px;
+      object-fit: contain;
+      padding: 0;
+    }
+
+    .nav-pills {
+      gap: .25rem;
+    }
+
+    .nav-pills .nav-link {
+      background: #fff;
+      border: 1px solid transparent;
+      border-left: 4px solid transparent;
+      border-radius: 12px;
+      color: var(--nav-text);
+      font-weight: 800;
+      padding: .85rem 1rem;
+      text-align: left;
+      transition: all .25s ease;
+    }
+
+    .nav-pills .nav-link:hover {
+      background: var(--brand-soft);
+      border-color: var(--line);
+      color: var(--brand);
+      transform: translateX(2px);
+    }
+
+    .nav-pills .nav-link.active {
+      background: var(--brand-soft);
+      border-color: var(--line);
+      border-left-color: var(--accent-color);
+      box-shadow: var(--sombra);
+      color: var(--accent-color);
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--sombra);
+      transition: box-shadow .3s ease, transform .3s ease, border-color .3s ease;
+    }
+
+    .panel:hover {
+      box-shadow: var(--sombra-hover);
+    }
+
+    .login-panel {
+      margin: 2rem auto 0;
+      max-width: 480px;
+      position: relative;
+    }
+
+    .login-panel::before {
+      background: linear-gradient(90deg, var(--brand), var(--yellow), var(--blue));
+      border-radius: 16px 16px 0 0;
+      content: "";
+      height: 5px;
+      left: -1px;
+      position: absolute;
+      right: -1px;
+      top: -1px;
+    }
+
+    .section-title {
+      color: var(--ink);
+      font-size: 1.18rem;
+      font-weight: 900;
+    }
+
+    .section-description {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .form-control,
+    .form-select {
+      border-color: var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      min-height: 44px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 .2rem rgba(59, 0, 109, .12);
+    }
+
+    .form-check-input {
+      border-color: #cfc6dc;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--brand);
+      border-color: var(--brand);
+    }
+
+    .text-bg-secondary {
+      background-color: var(--brand-soft) !important;
+      color: var(--brand) !important;
+      border: 1px solid var(--borda);
+      font-weight: 800;
+    }
+
+    .badge.text-bg-light {
+      background: var(--brand-soft) !important;
+      border: 1px solid var(--line);
+      color: var(--brand) !important;
+      font-weight: 800;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--pink);
+    }
+
+    .btn {
+      border-radius: 12px;
+      font-weight: 800;
+      min-height: 40px;
+      transition: all .3s ease;
+    }
+
+    .btn-primary {
+      --bs-btn-bg: var(--amarelo);
+      --bs-btn-border-color: var(--amarelo);
+      --bs-btn-color: var(--roxo);
+      --bs-btn-hover-bg: #e8bb30;
+      --bs-btn-hover-border-color: #e8bb30;
+      --bs-btn-hover-color: var(--roxo);
+      --bs-btn-active-bg: var(--yellow-dark);
+      --bs-btn-active-border-color: var(--yellow-dark);
+      box-shadow: 0 4px 15px rgba(249, 204, 61, .20);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249, 204, 61, .35);
+    }
+
+    .btn-outline-secondary,
+    .btn-outline-light {
+      --bs-btn-color: var(--brand);
+      --bs-btn-border-color: var(--line);
+      --bs-btn-hover-bg: var(--brand-soft);
+      --bs-btn-hover-border-color: var(--brand);
+      --bs-btn-hover-color: var(--brand);
+      background: #fff;
+    }
+
+    .btn-success {
+      --bs-btn-bg: var(--ok);
+      --bs-btn-border-color: var(--ok);
+      --bs-btn-hover-bg: #05603a;
+      --bs-btn-hover-border-color: #05603a;
+    }
+
+    .pin-code {
+      color: var(--brand);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: .75rem;
+    }
+
+    .status-chip {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: .8rem .9rem;
+      background: #fff;
+      font-size: .9rem;
+      font-weight: 700;
+      min-height: 72px;
+    }
+
+    .status-chip.sent {
+      border-color: #fedf89;
+      background: #fffaeb;
+      color: var(--warn);
+    }
+
+    .status-chip.missing {
+      border-color: #fecdca;
+      background: #fef3f2;
+      color: var(--danger);
+    }
+
+    .status-chip.completed {
+      border-color: #abefc6;
+      background: #ecfdf3;
+      color: var(--ok);
+    }
+
+    .section-state {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .45rem .65rem;
+      font-weight: 700;
+      font-size: .88rem;
+      white-space: nowrap;
+    }
+
+    .section-state.missing {
+      border-color: #fecdca;
+      background: #fef3f2;
+      color: var(--danger);
+    }
+
+    .section-state.sent {
+      border-color: #fedf89;
+      background: #fffaeb;
+      color: var(--warn);
+    }
+
+    .section-state.completed {
+      border-color: #abefc6;
+      background: #ecfdf3;
+      color: var(--ok);
+    }
+
+    .checkbox-group {
+      display: grid;
+      gap: .45rem;
+    }
+
+    .checkbox-group .form-check {
+      margin-bottom: 0;
+    }
+
+    .help-dialog {
+      border: 0;
+      border-radius: 8px;
+      box-shadow: 0 24px 60px rgba(59, 0, 109, .24);
+      max-width: 560px;
+      padding: 0;
+      width: calc(100% - 2rem);
+    }
+
+    .user-dialog {
+      max-width: 760px;
+    }
+
+    .help-dialog::backdrop {
+      background: rgba(16, 24, 40, .55);
+    }
+
+    .help-dialog-header,
+    .help-dialog-footer {
+      align-items: center;
+      display: flex;
+      gap: .75rem;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+    }
+
+    .help-dialog-header {
+      border-bottom: 1px solid var(--line);
+      border-top: 5px solid var(--yellow);
+    }
+
+    .help-dialog-body {
+      min-height: 180px;
+      padding: 1.25rem;
+    }
+
+    .help-dialog-footer {
+      border-top: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+
+    .help-progress {
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .section-checkbox-grid {
+      display: grid;
+      gap: .5rem;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    }
+
+    .section-checkbox-grid .form-check {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      margin: 0;
+      padding: .65rem .8rem .65rem 2.35rem;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    #usersList article {
+      background: #fff;
+      border-radius: 16px !important;
+      border-color: var(--line) !important;
+      box-shadow: var(--sombra);
+    }
+
+    #usersList h2 {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .records-table-wrap {
+      max-height: 360px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55);
+    }
+
+    .records-table {
+      min-width: 780px;
+      margin-bottom: 0;
+    }
+
+    .records-table th {
+      position: sticky;
+      top: 0;
+      background: var(--bg-secundario);
+      color: var(--brand);
+      font-family: "Montserrat", "Poppins", sans-serif;
+      font-size: .78rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      z-index: 1;
+    }
+
+    .supplier-history {
+      min-height: 190px;
+    }
+
+    .supplier-history .records-table-wrap {
+      max-height: 520px;
+    }
+
+    .supplier-history .records-table th,
+    .supplier-history .records-table td {
+      padding: .8rem;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: inset 0 -2px 0 rgba(255, 202, 44, .28);
+    }
+
+    .mode-switch button {
+      border: 0;
+      background: #fff;
+      color: var(--ink);
+      padding: .45rem .75rem;
+      font-weight: 800;
+    }
+
+    .mode-switch button.active {
+      background: var(--brand-soft);
+      box-shadow: inset 0 -3px 0 var(--yellow);
+      color: var(--brand);
+    }
+
+    .bulk-grid-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .bulk-grid {
+      min-width: 980px;
+      margin-bottom: 0;
+    }
+
+    .bulk-grid th {
+      background: var(--bg-secundario);
+      color: var(--brand);
+      font-family: "Montserrat", "Poppins", sans-serif;
+      font-size: .78rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      white-space: nowrap;
+    }
+
+    .bulk-grid td {
+      min-width: 170px;
+      vertical-align: top;
+    }
+
+    .bulk-grid .row-number {
+      min-width: 56px;
+      width: 56px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--brand);
+      flex: 0 0 auto;
+      padding: 3px;
+    }
+
+    .icon-button:hover {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .icon-button img {
+      width: 34px;
+      height: 28px;
+      object-fit: contain;
+      display: block;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #101828;
+      color: #f2e8fb;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: .75rem 0 0;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="container app-shell py-3">
+      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-3">
+          <img class="brand-logo" src="assets/mc.png" alt="Meu Cliente">
+          <div>
+            <h1 class="h3 mb-1" id="appTitle">Onboarding</h1>
+            <small id="appSubtitle">Acesse com seu PIN para continuar.</small>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge text-bg-light" id="sessionBadge">Login</span>
+          <button class="btn btn-sm btn-outline-light" id="logoutButton" type="button" hidden>Sair</button>
+        </div>
+      </div>
+    </div>
+    </div>
+  </header>
+
+  <main class="container app-shell py-4">
+    <section class="panel login-panel p-4" id="loginView">
+      <div class="mb-4">
+        <div class="section-title">Entrar com PIN</div>
+        <p class="section-description">Use o PIN do cliente ou o PIN admin.</p>
+      </div>
+      <form class="row g-3" id="loginForm">
+        <div class="col-12">
+          <label class="form-label required" for="pin">PIN</label>
+          <input class="form-control form-control-lg text-uppercase pin-code" id="pin" name="pin" autocomplete="one-time-code" maxlength="20" required>
+        </div>
+        <div class="col-12 d-grid">
+          <button class="btn btn-primary btn-lg" type="submit">Entrar</button>
+        </div>
+      </form>
+      <div id="loginResult" class="mt-3"></div>
+    </section>
+
+    <section id="adminView" hidden>
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="panel p-4">
+            <div class="mb-4">
+              <div class="section-title">Criar usuario</div>
+              <p class="section-description">Cadastre um cliente, escolha o perfil e libere as abas necessarias.</p>
+            </div>
+            <button class="btn btn-primary w-100" id="openCreateUserModalButton" type="button">Adicionar cliente</button>
+            <div id="createUserResult" class="mt-3"></div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="panel p-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+              <div>
+                <div class="section-title">Usuários e envios</div>
+                <p class="section-description">Acompanhe os PINs e o que cada cliente ja enviou.</p>
+              </div>
+              <button class="btn btn-outline-secondary" id="refreshUsersButton" type="button">Atualizar</button>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-md-7">
+                <label class="visually-hidden" for="userSearchInput">Pesquisar cliente</label>
+                <input class="form-control" id="userSearchInput" type="search" placeholder="Pesquisar por nome ou PIN">
+              </div>
+              <div class="col-md-5">
+                <label class="visually-hidden" for="userProfileFilter">Filtrar por perfil</label>
+                <select class="form-select" id="userProfileFilter">
+                  <option value="">Todos os perfis</option>
+                  <option value="SMB">SMB</option>
+                  <option value="ENTERPRISE">ENTERPRISE</option>
+                  <option value="SMART">SMART</option>
+                </select>
+              </div>
+            </div>
+            <div id="usersList"></div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="panel p-4" id="recordsPanel" hidden>
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+              <div>
+                <div class="section-title" id="recordsTitle">Dados enviados</div>
+                <p class="section-description" id="recordsDescription"></p>
+              </div>
+              <div class="admin-actions" id="recordsActions"></div>
+            </div>
+            <div id="recordsContent"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="userView" hidden>
+      <div class="row g-3">
+        <aside class="col-lg-3">
+          <nav class="nav nav-pills flex-column" id="sectionTabs" aria-label="Abas de cadastro"></nav>
+        </aside>
+
+        <section class="col-lg-9">
+          <div class="panel p-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-3 mb-4">
+              <div>
+                <div class="section-title" id="sectionTitle"></div>
+                <p class="section-description" id="sectionDescription"></p>
+              </div>
+              <div class="d-flex flex-column align-items-md-end gap-2">
+                <div class="d-flex align-items-center gap-2">
+                  <button class="btn btn-outline-secondary btn-sm" id="helpTutorialButton" type="button">Ajuda</button>
+                  <span class="badge rounded-pill text-bg-secondary" id="sectionBadge"></span>
+                </div>
+                <div class="mode-switch" aria-label="Modo de preenchimento">
+                  <button class="active" id="singleModeButton" type="button">Registro individual</button>
+                  <button id="bulkModeButton" type="button">Grade</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="singleEntryView">
+              <form id="onboardingForm" class="row g-3"></form>
+            </div>
+            <div id="bulkEntryView" hidden>
+              <form id="bulkForm">
+                <div class="bulk-grid-wrap">
+                  <table class="table table-sm bulk-grid" id="bulkTable"></table>
+                </div>
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-between align-items-sm-center mt-3">
+                  <button class="btn btn-outline-secondary" id="addBulkRowButton" type="button">Adicionar linha</button>
+                  <div class="d-flex flex-column flex-sm-row gap-2">
+                    <button class="btn btn-outline-secondary" id="clearBulkButton" type="button">Limpar grade</button>
+                    <button class="btn btn-primary" type="submit">Salvar grade</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div id="resultado" class="mt-4"></div>
+            <div class="mt-4" id="clientRecordsPanel">
+              <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-2">
+                <div>
+                  <div class="section-title">Informações já enviadas</div>
+                  <p class="section-description" id="clientRecordsDescription"></p>
+                </div>
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+                  <span class="section-state missing" id="clientSectionState">Não enviado</span>
+                  <button class="btn btn-success btn-sm" id="confirmSectionButton" type="button">Confirmar finalizado</button>
+                  <button class="btn btn-outline-secondary btn-sm" id="refreshClientRecordsButton" type="button">Atualizar tabela</button>
+                </div>
+              </div>
+              <div id="clientRecordsContent"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="help-dialog" id="helpTutorialDialog" aria-labelledby="helpTutorialTitle">
+    <div class="help-dialog-header">
+      <div>
+        <div class="section-title" id="helpTutorialTitle">Ajuda</div>
+        <div class="help-progress" id="helpTutorialProgress"></div>
+      </div>
+      <button class="btn-close" id="closeHelpTutorialButton" type="button" aria-label="Fechar"></button>
+    </div>
+    <div class="help-dialog-body">
+      <h2 class="h5" id="helpTutorialStepTitle"></h2>
+      <p class="mb-0" id="helpTutorialStepDescription"></p>
+    </div>
+    <div class="help-dialog-footer">
+      <button class="btn btn-outline-secondary" id="previousHelpTutorialButton" type="button">Anterior</button>
+      <button class="btn btn-primary" id="nextHelpTutorialButton" type="button">Próximo</button>
+    </div>
+  </dialog>
+
+  <dialog class="help-dialog user-dialog" id="createUserDialog" aria-labelledby="createUserDialogTitle">
+    <form id="createUserForm">
+      <div class="help-dialog-header">
+        <div>
+          <div class="section-title" id="createUserDialogTitle">Adicionar cliente</div>
+          <div class="help-progress">Defina o acesso antes de gerar o PIN.</div>
+        </div>
+        <button class="btn-close" id="closeCreateUserModalButton" type="button" aria-label="Fechar"></button>
+      </div>
+      <div class="help-dialog-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label required" for="userName">Nome do cliente</label>
+            <input class="form-control" id="userName" name="nome" placeholder="Meu Cliente x Coop" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="clientProfile">Perfil do cliente</label>
+            <select class="form-select" id="clientProfile" name="perfil_cliente">
+              <option value="SMB">SMB</option>
+              <option value="ENTERPRISE">ENTERPRISE</option>
+              <option value="SMART">SMART</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="driveLink">Link da pasta de plantas</label>
+            <input class="form-control" id="driveLink" name="drive_link" type="url" placeholder="https://drive.google.com/...">
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="diagnosticPhotosLink">Link da pasta de fotos do diagnóstico</label>
+            <input class="form-control" id="diagnosticPhotosLink" name="diagnostic_photos_link" type="url" placeholder="https://drive.google.com/...">
+          </div>
+          <div class="col-12">
+            <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-2">
+              <span class="form-label mb-0">Abas liberadas</span>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAllUserSections" checked>
+                <label class="form-check-label" for="selectAllUserSections">Selecionar todas</label>
+              </div>
+            </div>
+            <div class="section-checkbox-grid" id="createUserSections"></div>
+          </div>
+        </div>
+      </div>
+      <div class="help-dialog-footer">
+        <button class="btn btn-outline-secondary" type="button" id="cancelCreateUserModalButton">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Gerar PIN</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="help-dialog user-dialog" id="editUserDialog" aria-labelledby="editUserDialogTitle">
+    <form id="editUserForm">
+      <input type="hidden" name="user_id" id="editUserId">
+      <div class="help-dialog-header">
+        <div>
+          <div class="section-title" id="editUserDialogTitle">Editar cliente</div>
+          <div class="help-progress">Nome, nível, perfil e abas liberadas.</div>
+        </div>
+        <button class="btn-close" id="closeEditUserModalButton" type="button" aria-label="Fechar"></button>
+      </div>
+      <div class="help-dialog-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label required" for="editUserName">Nome do cliente</label>
+            <input class="form-control" id="editUserName" name="nome" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="editUserLevel">Nível</label>
+            <select class="form-select" id="editUserLevel" name="nivel">
+              <option value="cliente">Cliente</option>
+              <option value="admin_cliente">Admin do cliente</option>
+              <option value="visualizador">Visualizador</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="editUserProfile">Perfil do cliente</label>
+            <select class="form-select" id="editUserProfile" name="perfil_cliente">
+              <option value="SMB">SMB</option>
+              <option value="ENTERPRISE">ENTERPRISE</option>
+              <option value="SMART">SMART</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-2">
+              <span class="form-label mb-0">Abas liberadas</span>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAllEditUserSections">
+                <label class="form-check-label" for="selectAllEditUserSections">Selecionar todas</label>
+              </div>
+            </div>
+            <div class="section-checkbox-grid" id="editUserSections"></div>
+          </div>
+        </div>
+      </div>
+      <div class="help-dialog-footer">
+        <button class="btn btn-outline-secondary" type="button" id="cancelEditUserModalButton">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Salvar alterações</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const sections = [
+      {
+        id: 'dados_loja',
+        label: 'Dados de Loja',
+        badge: 'Dados de Loja',
+        description: 'Campos da aba Nome Fantasia, CNPJ, razao social, sigla, formato, bandeira, endereco e faturamento.',
+        fields: [
+          { name: 'nome_fantasia', label: 'Nome Fantasia', required: true },
+          { name: 'cnpj', label: 'CNPJ', numeric: true, maxLength: 14 },
+          { name: 'razao_social', label: 'Razão Social', full: true },
+          { name: 'sigla_loja', label: 'Sigla - Loja' },
+          { name: 'formato', label: 'Formato' },
+          { name: 'bandeira', label: 'Bandeira' },
+          { name: 'cep', label: 'CEP', numeric: true, maxLength: 8 },
+          { name: 'endereco', label: 'Endereço', full: true },
+          { name: 'complemento', label: 'Complemento' },
+          { name: 'regiao', label: 'Região' },
+          { name: 'faturamento', label: 'Faturamento', type: 'number', step: '0.01' }
+        ]
+      },
+      {
+        id: 'categorias',
+        label: 'Categoria',
+        badge: 'Categoria',
+        description: 'Cadastro de categoria, setor e departamento.',
+        fields: [
+          { name: 'categoria', label: 'Categoria' },
+          { name: 'setor', label: 'Setor' },
+          { name: 'departamento', label: 'Departamento' }
+        ]
+      },
+      {
+        id: 'usuarios_internos',
+        label: 'Usuarios Internos',
+        badge: 'Usuarios Internos',
+        description: 'Pessoas internas envolvidas, e-mail, WhatsApp e área.',
+        fields: [
+          { name: 'nome', label: 'Nome', required: true },
+          { name: 'email', label: 'E-mail', type: 'email' },
+          { name: 'whatsapp', label: 'Whatsapp' },
+          { name: 'area', label: 'Área' }
+        ]
+      },
+      {
+        id: 'gerentes_loja',
+        label: 'Gerente de loja',
+        badge: 'Gerente de loja',
+        description: 'Gerentes ou e-mails das lojas e a loja responsavel.',
+        fields: [
+          { name: 'nome', label: 'Nome/Nome da loja', required: true },
+          { name: 'email', label: 'E-mail ou e-mail da loja', type: 'email' },
+          { name: 'whatsapp', label: 'Whatsapp' },
+          { name: 'loja_responsavel', label: 'Loja responsavel' }
+        ]
+      },
+      {
+        id: 'industrias',
+        label: 'Indústrias',
+        badge: 'Industrias',
+        description: 'Cadastro usado quando nao houver integracao com ERP.',
+        supplierImport: true,
+        fields: [
+          { name: 'cnpj_industria', label: 'CNPJ Indústria', required: true, numeric: true, maxLength: 14 },
+          { name: 'razao_social', label: 'Razão Social', full: true },
+          { name: 'nome_fantasia', label: 'Nome Fantasia' },
+          { name: 'codigo_interno', label: 'Código Interno' },
+          { name: 'nome_representante', label: 'Nome do representante' },
+          { name: 'telefone_representante', label: 'Telefone do representante' },
+          { name: 'email_representante', label: 'E-mail do representante', type: 'email' },
+          { name: 'whatsapp_representante', label: 'WhatsApp do representante' },
+          { name: 'segmento', label: 'Segmento' },
+          { name: 'faturamento', label: 'Faturamento', type: 'number', step: '0.01' }
+        ]
+      },
+      {
+        id: 'dados_bancarios',
+        label: 'Dados Bancários',
+        badge: 'Dados Bancarios',
+        description: 'Tipos de pagamento aceitos no projeto.',
+        fields: [
+          { name: 'favorecido', label: 'Favorecido' },
+          { name: 'banco', label: 'Banco' },
+          { name: 'agencia', label: 'Agência' },
+          { name: 'conta_corrente', label: 'Conta Corrente' },
+          { name: 'cnpj', label: 'CNPJ' },
+          { name: 'chave_pix', label: 'Chave Pix' },
+          { name: 'tipo_pagamento', label: 'Tipo de pagamento', required: true, type: 'checkbox-group', options: ['Bonificação', 'Deposito', 'Pix', 'Abatimento em Duplicata', 'Boleto', 'Desconto em Boleto'], full: true, selectAll: true },
+          { name: 'observacoes', label: 'Observacoes', type: 'textarea', full: true }
+        ]
+      },
+      {
+        id: 'plantas_loja',
+        label: 'Planta de loja',
+        badge: 'Planta de loja',
+        description: 'Acesse o espaço do cliente no Drive para enviar as plantas de loja.',
+        driveLink: true,
+        fields: [
+          { name: 'observacoes', label: 'Observações', type: 'textarea', full: true }
+        ]
+      },
+      {
+        id: 'diagnostico_loja',
+        label: 'Diagnóstico de loja',
+        badge: 'Diagnostico',
+        description: 'Acesse a pasta de fotos do diagnóstico e registre observações sobre a loja.',
+        diagnosticLink: true,
+        fields: [
+          { name: 'observacoes', label: 'Observações', type: 'textarea', full: true }
+        ]
+      },
+      {
+        id: 'ativos_fisicos',
+        label: 'Ativos Físicos',
+        badge: 'Ativos Fisicos',
+        description: 'Ativos por loja, com valor de custo, venda e quantidade.',
+        fields: [
+          { name: 'nome_ativo', label: 'Nome do ativo', required: true, full: true },
+          { name: 'valor_custo', label: 'Valor de custo', type: 'number', step: '0.01' },
+          { name: 'valor_venda', label: 'Valor de venda', type: 'number', step: '0.01' },
+          { name: 'loja', label: 'Loja' },
+          { name: 'quantidade', label: 'Quantidade' },
+          { name: 'observacoes', label: 'Observações', type: 'textarea', full: true }
+        ]
+      },
+      {
+        id: 'ativos_digitais',
+        label: 'Ativos Digitais',
+        badge: 'Ativos Digitais',
+        description: 'Ativos digitais com valor e canal/loja digital.',
+        fields: [
+          { name: 'nome_ativo', label: 'Nome do ativo', required: true },
+          { name: 'valor_custo', label: 'Valor de custo', type: 'number', step: '0.01' },
+          { name: 'valor_venda', label: 'Valor de venda', type: 'number', step: '0.01' },
+          { name: 'loja_digital', label: 'Loja Digital' }
+        ]
+      },
+      {
+        id: 'alcadas',
+        label: 'Alçada',
+        badge: 'Alcada',
+        description: 'Nome e percentual de alçada.',
+        fields: [
+          { name: 'nome', label: 'Nome', required: true },
+          { name: 'alcada_percentual', label: 'Alçada (%)', type: 'number', step: '0.01' }
+        ]
+      },
+    ];
+
+    const loginView = document.getElementById('loginView');
+    const adminView = document.getElementById('adminView');
+    const userView = document.getElementById('userView');
+    const logoutButton = document.getElementById('logoutButton');
+    const sessionBadge = document.getElementById('sessionBadge');
+    const appTitle = document.getElementById('appTitle');
+    const appSubtitle = document.getElementById('appSubtitle');
+    const loginForm = document.getElementById('loginForm');
+    const loginResult = document.getElementById('loginResult');
+    const openCreateUserModalButton = document.getElementById('openCreateUserModalButton');
+    const editUserDialog = document.getElementById('editUserDialog');
+    const editUserForm = document.getElementById('editUserForm');
+    const editUserSections = document.getElementById('editUserSections');
+    const selectAllEditUserSections = document.getElementById('selectAllEditUserSections');
+    const createUserDialog = document.getElementById('createUserDialog');
+    const closeCreateUserModalButton = document.getElementById('closeCreateUserModalButton');
+    const cancelCreateUserModalButton = document.getElementById('cancelCreateUserModalButton');
+    const createUserSections = document.getElementById('createUserSections');
+    const selectAllUserSections = document.getElementById('selectAllUserSections');
+    const createUserForm = document.getElementById('createUserForm');
+    const createUserResult = document.getElementById('createUserResult');
+    const refreshUsersButton = document.getElementById('refreshUsersButton');
+    const userSearchInput = document.getElementById('userSearchInput');
+    const userProfileFilter = document.getElementById('userProfileFilter');
+    const usersList = document.getElementById('usersList');
+    const recordsPanel = document.getElementById('recordsPanel');
+    const recordsTitle = document.getElementById('recordsTitle');
+    const recordsDescription = document.getElementById('recordsDescription');
+    const recordsActions = document.getElementById('recordsActions');
+    const recordsContent = document.getElementById('recordsContent');
+    const tabs = document.getElementById('sectionTabs');
+    const form = document.getElementById('onboardingForm');
+    const singleEntryView = document.getElementById('singleEntryView');
+    const bulkEntryView = document.getElementById('bulkEntryView');
+    const singleModeButton = document.getElementById('singleModeButton');
+    const bulkModeButton = document.getElementById('bulkModeButton');
+    const bulkForm = document.getElementById('bulkForm');
+    const bulkTable = document.getElementById('bulkTable');
+    const addBulkRowButton = document.getElementById('addBulkRowButton');
+    const clearBulkButton = document.getElementById('clearBulkButton');
+    const clientRecordsDescription = document.getElementById('clientRecordsDescription');
+    const clientRecordsContent = document.getElementById('clientRecordsContent');
+    const refreshClientRecordsButton = document.getElementById('refreshClientRecordsButton');
+    const clientSectionState = document.getElementById('clientSectionState');
+    const confirmSectionButton = document.getElementById('confirmSectionButton');
+    const helpTutorialButton = document.getElementById('helpTutorialButton');
+    const helpTutorialDialog = document.getElementById('helpTutorialDialog');
+    const closeHelpTutorialButton = document.getElementById('closeHelpTutorialButton');
+    const previousHelpTutorialButton = document.getElementById('previousHelpTutorialButton');
+    const nextHelpTutorialButton = document.getElementById('nextHelpTutorialButton');
+    const helpTutorialTitle = document.getElementById('helpTutorialTitle');
+    const helpTutorialProgress = document.getElementById('helpTutorialProgress');
+    const helpTutorialStepTitle = document.getElementById('helpTutorialStepTitle');
+    const helpTutorialStepDescription = document.getElementById('helpTutorialStepDescription');
+    const resultBox = document.getElementById('resultado');
+    let activeSection = sections[0];
+    let currentUser = null;
+    let entryMode = 'single';
+    let clientRows = [];
+    let adminUsers = [];
+    let activeAdminRecordsUserId = null;
+    let helpTutorialStep = 0;
+
+    function setView(view, data = {}) {
+      loginView.hidden = view !== 'login';
+      adminView.hidden = view !== 'admin';
+      userView.hidden = view !== 'user';
+      logoutButton.hidden = view === 'login';
+
+      if (view === 'admin') {
+        appTitle.textContent = 'Painel Admin';
+        appSubtitle.textContent = 'Gerencie usuários, PINs e status dos envios.';
+        sessionBadge.textContent = 'Admin';
+      } else if (view === 'user') {
+        currentUser = data.user || currentUser;
+        appTitle.textContent = data.user?.nome || 'Onboarding';
+        appSubtitle.textContent = 'Preencha as informacoes para o onboarding.';
+        sessionBadge.textContent = data.user?.pin || 'Cliente';
+      } else {
+        currentUser = null;
+        appTitle.textContent = 'Onboarding';
+        appSubtitle.textContent = 'Acesse com seu PIN para continuar.';
+        sessionBadge.textContent = 'Login';
+      }
+    }
+
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, options);
+      const text = await response.text();
+      let result;
+
+      try {
+        result = text ? JSON.parse(text) : {};
+      } catch (error) {
+        throw new Error(text || 'Resposta inválida do servidor.');
+      }
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Nao foi possível concluir a ação.');
+      }
+
+      return result;
+    }
+
+    function getAllowedSectionIds() {
+      if (!currentUser || !Array.isArray(currentUser.allowed_sections) || currentUser.allowed_sections.length === 0) {
+        return sections.map(section => section.id);
+      }
+
+      return currentUser.allowed_sections;
+    }
+
+    function getVisibleSections() {
+      const allowed = new Set(getAllowedSectionIds());
+      return sections.filter(section => allowed.has(section.id));
+    }
+
+    function renderTabs() {
+      const visibleSections = getVisibleSections();
+
+      if (!visibleSections.some(section => section.id === activeSection.id)) {
+        activeSection = visibleSections[0] || sections[0];
+      }
+
+      tabs.innerHTML = visibleSections.map(section => `
+        <button
+          class="nav-link ${section.id === activeSection.id ? 'active' : ''}"
+          type="button"
+          data-section="${section.id}">
+          ${section.label}
+        </button>
+      `).join('');
+    }
+
+    function renderCreateUserSections() {
+      createUserSections.innerHTML = sections.map(section => `
+        <label class="form-check">
+          <input class="form-check-input" type="checkbox" name="allowed_sections[]" value="${section.id}" data-user-section checked>
+          <span class="form-check-label">${escapeHtml(section.label)}</span>
+        </label>
+      `).join('');
+      syncCreateUserSelectAll();
+    }
+
+    function syncCreateUserSelectAll() {
+      const boxes = Array.from(createUserSections.querySelectorAll('[data-user-section]'));
+      const checked = boxes.filter(input => input.checked).length;
+      selectAllUserSections.checked = boxes.length > 0 && checked === boxes.length;
+      selectAllUserSections.indeterminate = checked > 0 && checked < boxes.length;
+    }
+
+    function safeReset(formElement) {
+      if (formElement && typeof formElement.reset === 'function') {
+        formElement.reset();
+      }
+    }
+
+    function openCreateUserModal() {
+      safeReset(createUserForm);
+      createUserSections.querySelectorAll('[data-user-section]').forEach(input => {
+        input.checked = true;
+      });
+      syncCreateUserSelectAll();
+      createUserDialog.showModal();
+    }
+
+    function closeCreateUserModal() {
+      if (createUserDialog.open) {
+        createUserDialog.close();
+      }
+    }
+
+    function renderEditUserSections(allowedIds) {
+      const allowed = new Set(allowedIds);
+      editUserSections.innerHTML = sections.map(section => `
+        <label class="form-check">
+          <input class="form-check-input" type="checkbox" name="allowed_sections[]" value="${section.id}" data-edit-user-section ${allowed.has(section.id) ? 'checked' : ''}>
+          <span class="form-check-label">${escapeHtml(section.label)}</span>
+        </label>
+      `).join('');
+      syncEditUserSelectAll();
+    }
+
+    function syncEditUserSelectAll() {
+      const boxes = Array.from(editUserSections.querySelectorAll('[data-edit-user-section]'));
+      const checked = boxes.filter(input => input.checked).length;
+      selectAllEditUserSections.checked = boxes.length > 0 && checked === boxes.length;
+      selectAllEditUserSections.indeterminate = checked > 0 && checked < boxes.length;
+    }
+
+    function openEditUserModal(userId) {
+      const user = adminUsers.find(item => item.id === userId);
+      if (!user) return;
+
+      document.getElementById('editUserId').value = user.id;
+      document.getElementById('editUserName').value = user.nome;
+      document.getElementById('editUserLevel').value = user.nivel || 'cliente';
+      document.getElementById('editUserProfile').value = user.perfil_cliente || 'SMB';
+      renderEditUserSections(user.allowed_sections || []);
+      editUserDialog.showModal();
+    }
+
+    function closeEditUserModal() {
+      if (editUserDialog.open) {
+        editUserDialog.close();
+      }
+    }
+
+    function fieldTemplate(field) {
+      const colClass = field.full ? 'col-12' : 'col-md-6';
+      const requiredClass = field.required ? 'required' : '';
+      const requiredAttr = field.required ? 'required' : '';
+
+      if (field.type === 'textarea') {
+        return `
+          <div class="${colClass}">
+            <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+            <textarea class="form-control" id="${field.name}" name="${field.name}" rows="3" ${requiredAttr}></textarea>
+          </div>
+        `;
+      }
+
+      if (field.type === 'select') {
+        const options = ['<option value="">Selecione</option>']
+          .concat(field.options.map(option => `<option value="${option}">${option}</option>`));
+        return `
+          <div class="${colClass}">
+            <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+            <select class="form-select" id="${field.name}" name="${field.name}" ${requiredAttr}>
+              ${options.join('')}
+            </select>
+          </div>
+        `;
+      }
+
+      if (field.type === 'checkbox-group') {
+        return `
+          <div class="${colClass}">
+            <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-2">
+              <span class="form-label ${requiredClass} mb-0">${field.label}</span>
+              ${field.selectAll ? `
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="${field.name}_all" data-select-all="${field.name}">
+                  <label class="form-check-label" for="${field.name}_all">Selecionar todos</label>
+                </div>
+              ` : ''}
+            </div>
+            <div class="checkbox-group" role="group" aria-label="${escapeHtml(field.label)}">
+              ${field.options.map((option, index) => {
+                const id = `${field.name}_${index}`;
+                return `
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="${id}" name="${field.name}[]" value="${escapeHtml(option)}" data-checkbox-group="${field.name}" ${field.required ? 'data-required-group="true"' : ''}>
+                    <label class="form-check-label" for="${id}">${escapeHtml(option)}</label>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="${colClass}">
+          <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+          <input
+            class="form-control"
+            id="${field.name}"
+            name="${field.name}"
+            type="${field.type || 'text'}"
+            ${field.numeric ? 'inputmode="numeric" pattern="[0-9]*"' : ''}
+            ${field.maxLength ? `maxlength="${field.maxLength}"` : ''}
+            ${field.maxLength ? `data-max-length="${field.maxLength}"` : ''}
+            ${field.numeric ? 'data-numeric="true"' : ''}
+            ${field.step ? `step="${field.step}"` : ''}
+            ${requiredAttr}>
+        </div>
+      `;
+    }
+
+    function renderSection(section) {
+      activeSection = section;
+      document.getElementById('sectionTitle').textContent = section.label;
+      document.getElementById('sectionDescription').textContent = section.description;
+      document.getElementById('sectionBadge').textContent = section.badge;
+      resultBox.innerHTML = '';
+
+      const driveLinkBlock = section.driveLink ? `
+        <div class="col-12">
+          <div class="alert ${currentUser?.drive_link ? 'alert-primary' : 'alert-warning'} mb-0">
+            ${currentUser?.drive_link
+              ? `Use o botao abaixo para acessar o espaco deste cliente no Drive.<br><a class="btn btn-primary mt-3" href="${escapeHtml(currentUser.drive_link)}" target="_blank" rel="noopener">Abrir Drive</a>`
+              : 'O link do Drive ainda nao foi configurado pelo admin.'}
+          </div>
+        </div>
+        <input type="hidden" name="pasta_upload" value="Upload via Drive">
+        <input type="hidden" name="link_pasta" value="${escapeHtml(currentUser?.drive_link || '')}">
+      ` : '';
+
+      const diagnosticLinkBlock = section.diagnosticLink ? `
+        <div class="col-12">
+          <div class="alert ${currentUser?.diagnostic_photos_link ? 'alert-primary' : 'alert-warning'} mb-0">
+            ${currentUser?.diagnostic_photos_link
+              ? `Use o botao abaixo para acessar a pasta de fotos do diagnostico.<br><a class="btn btn-primary mt-3" href="${escapeHtml(currentUser.diagnostic_photos_link)}" target="_blank" rel="noopener">Abrir pasta de fotos</a>`
+              : 'O link da pasta de fotos do diagnostico ainda nao foi configurado pelo admin.'}
+          </div>
+        </div>
+        <input type="hidden" name="pasta_fotos" value="Fotos via Drive">
+        <input type="hidden" name="link_fotos" value="${escapeHtml(currentUser?.diagnostic_photos_link || '')}">
+      ` : '';
+
+      form.innerHTML = `
+        <input type="hidden" name="section" value="${section.id}">
+        <input type="hidden" name="record_id" value="">
+        ${section.supplierImport ? renderSupplierImportSection() : ''}
+        ${driveLinkBlock}
+        ${diagnosticLinkBlock}
+        ${section.fields.map(fieldTemplate).join('')}
+        <div class="col-12 d-flex flex-column flex-sm-row gap-2 justify-content-end mt-2">
+          <button type="button" class="btn btn-outline-secondary" data-cancel-edit hidden>Cancelar edicao</button>
+          <button type="reset" class="btn btn-outline-secondary">Limpar</button>
+          <button type="submit" class="btn btn-primary">Salvar registro</button>
+        </div>
+      `;
+
+      if (entryMode === 'bulk' && !canUseBulk(section)) {
+        setEntryMode('single');
+      } else {
+        renderBulkGrid(section);
+      }
+
+      if (section.supplierImport) {
+        loadSupplierBatches();
+      }
+    }
+
+    async function loadClientRecords() {
+      if (!currentUser) return;
+
+      clientRecordsDescription.textContent = `Registros salvos em ${activeSection.label}.`;
+      clientRecordsContent.innerHTML = '<div class="alert alert-info mb-0">Carregando registros...</div>';
+
+      try {
+        const result = await requestJson(`backend/api/user_records.php?section=${encodeURIComponent(activeSection.id)}`);
+        clientRows = result.rows;
+        renderClientSectionStatus(result.status, result.rows.length);
+        renderClientRecords(result.columns, result.rows);
+      } catch (error) {
+        clientRecordsContent.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    }
+
+    function getSectionStatus(status, count) {
+      if (status?.finalized_at) {
+        return { key: 'completed', label: 'Finalizado' };
+      }
+
+      if (count > 0) {
+        return { key: 'sent', label: 'Em preenchimento' };
+      }
+
+      return { key: 'missing', label: 'Não enviado' };
+    }
+
+    function renderClientSectionStatus(status, count) {
+      const state = getSectionStatus(status, count);
+      clientSectionState.className = `section-state ${state.key}`;
+      clientSectionState.textContent = state.label;
+      confirmSectionButton.hidden = state.key === 'completed';
+      confirmSectionButton.disabled = count === 0;
+      confirmSectionButton.textContent = 'Confirmar finalizado';
+    }
+
+    function renderClientRecords(columns, rows) {
+      if (rows.length === 0) {
+        clientRecordsContent.innerHTML = '<div class="alert alert-secondary mb-0">Nenhum registro enviado nesta aba ainda.</div>';
+        return;
+      }
+
+      const fields = getDisplayFields(activeSection.id);
+
+      clientRecordsContent.innerHTML = `
+        <div class="records-table-wrap">
+          <table class="table table-sm table-striped records-table">
+            <thead>
+              <tr>
+                <th>Acoes</th>
+                ${fields.map(field => `<th>${escapeHtml(field.label)}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((row, index) => `
+                <tr>
+                  <td><button class="icon-button" type="button" data-edit-client-row="${index}" title="Editar" aria-label="Editar registro"><img src="logo.svg" alt=""></button></td>
+                  ${fields.map(field => `<td>${escapeHtml(row[field.name] ?? '')}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderSupplierImportSection() {
+      return `
+        <div class="col-12">
+          <div class="panel p-3">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+              <div>
+                <div class="section-title">Planilha de industrias</div>
+                <p class="section-description">Baixe o template, preencha mantendo as colunas e envie o arquivo CSV ou XLSX.</p>
+              </div>
+              <a class="btn btn-outline-secondary" href="backend/api/supplier_import.php?action=template">Baixar template</a>
+            </div>
+            <div class="row g-3 mt-1">
+              <div class="col-md-8">
+                <label class="form-label required" for="supplierFile">Arquivo</label>
+                <input class="form-control" id="supplierFile" name="supplier_file" type="file" accept=".csv,.xlsx">
+              </div>
+              <div class="col-md-4 d-grid align-items-end">
+                <button class="btn btn-primary mt-md-4" type="button" data-upload-suppliers>Enviar para analise</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="panel p-4 supplier-history">
+            <div class="section-title">Importacoes enviadas</div>
+            <div id="supplierBatchesContent" class="mt-3">
+              <div class="alert alert-info mb-0">Carregando importacoes...</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function uploadSupplierFile() {
+      const input = form.querySelector('#supplierFile');
+
+      if (!input?.files?.length) {
+        resultBox.innerHTML = '<div class="alert alert-danger mb-0">Selecione uma planilha CSV ou XLSX.</div>';
+        return;
+      }
+
+      resultBox.innerHTML = '<div class="alert alert-info mb-0">Enviando planilha de indústrias para analise...</div>';
+
+      try {
+        const formData = new FormData();
+        formData.append('supplier_file', input.files[0]);
+
+        const result = await requestJson('backend/api/supplier_import.php?action=upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        input.value = '';
+        resultBox.innerHTML = `<div class="alert alert-success mb-0">${result.message}</div>`;
+        await loadSupplierBatches();
+        await loadClientRecords();
+      } catch (error) {
+        resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    }
+
+    async function loadSupplierBatches() {
+      const target = document.getElementById('supplierBatchesContent');
+      if (!target) return;
+
+      try {
+        const result = await requestJson('backend/api/supplier_import.php?action=batches');
+
+        if (result.batches.length === 0) {
+          target.innerHTML = '<div class="alert alert-secondary mb-0">Nenhuma planilha enviada ainda.</div>';
+          return;
+        }
+
+        target.innerHTML = `
+          <div class="records-table-wrap">
+            <table class="table records-table">
+              <thead>
+                <tr>
+                  <th>Arquivo</th>
+                  <th>Linhas</th>
+                  <th>Status</th>
+                  <th>Enviado em</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.batches.map(batch => `
+                  <tr>
+                    <td>${escapeHtml(batch.nome_arquivo)}</td>
+                    <td>${escapeHtml(batch.total_linhas)}</td>
+                    <td><span class="section-state ${supplierBatchStatusMeta(batch.status).className}">${supplierBatchStatusMeta(batch.status).label}</span></td>
+                    <td>${formatDate(batch.created_at)}</td>
+                  </tr>
+                  ${batch.mensagem ? `<tr><td colspan="4" class="text-muted">${escapeHtml(batch.mensagem)}</td></tr>` : ''}
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (error) {
+        target.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    }
+
+    function getDisplayFields(sectionId) {
+      const section = sections.find(item => item.id === sectionId) || activeSection;
+      return section.fields;
+    }
+
+    function editClientRow(index) {
+      const row = clientRows[index];
+      if (!row) return;
+
+      setEntryMode('single');
+      form.querySelector('[name="record_id"]').value = row.id;
+      activeSection.fields.forEach(field => {
+        if (field.type === 'checkbox-group') {
+          const values = String(row[field.name] ?? '').split(',').map(value => value.trim()).filter(Boolean);
+          form.querySelectorAll(`[data-checkbox-group="${field.name}"]`).forEach(input => {
+            input.checked = values.includes(input.value);
+          });
+          syncSelectAll(field.name);
+          return;
+        }
+
+        const input = form.querySelector(`[name="${field.name}"]`);
+        if (input) {
+          input.value = row[field.name] ?? '';
+        }
+      });
+
+      const cancelButton = form.querySelector('[data-cancel-edit]');
+      if (cancelButton) {
+        cancelButton.hidden = false;
+      }
+
+      resultBox.innerHTML = '<div class="alert alert-info mb-0">Editando registro existente. Salve para atualizar.</div>';
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelEditMode() {
+      form.reset();
+      const recordInput = form.querySelector('[name="record_id"]');
+      const cancelButton = form.querySelector('[data-cancel-edit]');
+
+      if (recordInput) {
+        recordInput.value = '';
+      }
+
+      if (cancelButton) {
+        cancelButton.hidden = true;
+      }
+
+      resultBox.innerHTML = '';
+    }
+
+    function canUseBulk(section) {
+      return !section.driveLink && !section.diagnosticLink;
+    }
+
+    function setEntryMode(mode) {
+      entryMode = mode === 'bulk' && canUseBulk(activeSection) ? 'bulk' : 'single';
+      singleEntryView.hidden = entryMode !== 'single';
+      bulkEntryView.hidden = entryMode !== 'bulk';
+      singleModeButton.classList.toggle('active', entryMode === 'single');
+      bulkModeButton.classList.toggle('active', entryMode === 'bulk');
+      bulkModeButton.disabled = !canUseBulk(activeSection);
+      resultBox.innerHTML = '';
+
+      if (entryMode === 'bulk') {
+        renderBulkGrid(activeSection);
+      }
+    }
+
+    function renderBulkGrid(section, rowCount = 5) {
+      if (!canUseBulk(section)) {
+        bulkTable.innerHTML = '';
+        return;
+      }
+
+      const rows = Array.from({ length: rowCount }, (_, index) => bulkRowTemplate(section, index));
+      bulkTable.innerHTML = `
+        <thead>
+          <tr>
+            <th class="row-number">#</th>
+            ${section.fields.map(field => `<th>${escapeHtml(field.label)}${field.required ? ' *' : ''}</th>`).join('')}
+            <th class="row-number"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.join('')}
+        </tbody>
+      `;
+    }
+
+    function bulkRowTemplate(section, index) {
+      return `
+        <tr data-row>
+          <td class="row-number">${index + 1}</td>
+          ${section.fields.map(field => `<td>${bulkFieldTemplate(field)}</td>`).join('')}
+          <td class="row-number">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-remove-row>&times;</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    function bulkFieldTemplate(field) {
+      const baseAttrs = `class="form-control form-control-sm" data-field="${field.name}" ${field.step ? `step="${field.step}"` : ''} ${field.numeric ? 'inputmode="numeric" pattern="[0-9]*" data-numeric="true"' : ''} ${field.maxLength ? `maxlength="${field.maxLength}" data-max-length="${field.maxLength}"` : ''}`;
+
+      if (field.type === 'select') {
+        const options = ['<option value=""></option>']
+          .concat(field.options.map(option => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`));
+        return `<select class="form-select form-select-sm" data-field="${field.name}">${options.join('')}</select>`;
+      }
+
+      if (field.type === 'checkbox-group') {
+        const allId = `${field.name}_all_${Math.random().toString(36).slice(2)}`;
+        return `
+          <div class="checkbox-group">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="${allId}" data-bulk-select-all="${field.name}">
+              <label class="form-check-label small" for="${allId}">Selecionar todos</label>
+            </div>
+            ${field.options.map((option, index) => {
+              const id = `${field.name}_${index}_${Math.random().toString(36).slice(2)}`;
+              return `
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="${id}" value="${escapeHtml(option)}" data-field="${field.name}" data-checkbox-field="true">
+                  <label class="form-check-label small" for="${id}">${escapeHtml(option)}</label>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      if (field.type === 'textarea') {
+        return `<textarea ${baseAttrs} rows="1"></textarea>`;
+      }
+
+      return `<input ${baseAttrs} type="${field.type || 'text'}">`;
+    }
+
+    function addBulkRows(count = 1) {
+      const tbody = bulkTable.querySelector('tbody');
+      if (!tbody) return;
+
+      const start = tbody.querySelectorAll('[data-row]').length;
+      const markup = Array.from({ length: count }, (_, offset) => bulkRowTemplate(activeSection, start + offset)).join('');
+      tbody.insertAdjacentHTML('beforeend', markup);
+    }
+
+    function renumberBulkRows() {
+      bulkTable.querySelectorAll('[data-row]').forEach((row, index) => {
+        row.querySelector('.row-number').textContent = index + 1;
+      });
+    }
+
+    function collectBulkRows() {
+      return Array.from(bulkTable.querySelectorAll('[data-row]')).map(row => {
+        const data = {};
+        activeSection.fields.forEach(field => {
+          if (field.type === 'checkbox-group') {
+            data[field.name] = Array.from(row.querySelectorAll(`[data-field="${field.name}"]:checked`))
+              .map(input => input.value.trim())
+              .join(', ');
+            return;
+          }
+
+          data[field.name] = row.querySelector(`[data-field="${field.name}"]`)?.value.trim() || '';
+        });
+        return data;
+      });
+    }
+
+    function normalizeNumericInput(input) {
+      if (!input?.dataset?.numeric) return;
+
+      const maxLength = Number(input.dataset.maxLength || 0);
+      const digits = input.value.replace(/\D/g, '');
+      input.value = maxLength > 0 ? digits.slice(0, maxLength) : digits;
+    }
+
+    async function loadUsers() {
+      usersList.innerHTML = '<div class="alert alert-info mb-0">Carregando usuarios...</div>';
+      const result = await requestJson('backend/api/admin_users.php?action=list');
+      adminUsers = result.users || [];
+      renderUsers();
+    }
+
+    function renderUsers() {
+      const search = userSearchInput.value.trim().toLowerCase();
+      const profile = userProfileFilter.value;
+      const filteredUsers = adminUsers.filter(user => {
+        const profileMatch = profile === '' || (user.perfil_cliente || 'SMB') === profile;
+        const searchText = `${user.nome || ''} ${user.pin || ''}`.toLowerCase();
+        return profileMatch && (search === '' || searchText.includes(search));
+      });
+
+      if (adminUsers.length === 0) {
+        usersList.innerHTML = '<div class="alert alert-secondary mb-0">Nenhum usuario criado ainda.</div>';
+        return;
+      }
+
+      if (filteredUsers.length === 0) {
+        usersList.innerHTML = '<div class="alert alert-warning mb-0">Nenhum cliente encontrado com esses filtros.</div>';
+        return;
+      }
+
+      usersList.innerHTML = filteredUsers.map(user => `
+        <article class="border rounded-3 p-3 mb-3">
+          <div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-2 mb-3">
+            <div>
+              <h2 class="h5 mb-1">${escapeHtml(user.nome)}</h2>
+              <div class="text-muted small">Criado em ${formatDate(user.created_at)}</div>
+              <div class="small mt-1">
+                ${user.drive_link
+                  ? `<a href="${escapeHtml(user.drive_link)}" target="_blank" rel="noopener">Pasta do Drive configurada</a>`
+                  : '<span class="text-warning">Pasta do Drive pendente</span>'}
+              </div>
+              <div class="small text-muted mt-1">${user.allowed_sections.length} aba(s) liberada(s)</div>
+            </div>
+            <div class="text-md-end">
+              <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-2">
+                <span class="badge text-bg-light">${escapeHtml(user.perfil_cliente || 'SMB')}</span>
+                <span class="pin-code">${escapeHtml(user.pin)}</span>
+              </div>
+              <div class="small text-muted">${user.completed}/${user.total} abas finalizadas</div>
+            </div>
+          </div>
+          <div class="admin-actions mb-3">
+            <button class="btn btn-sm btn-primary" type="button" data-action="records" data-user-id="${user.id}">Ver tabela</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="editar-cliente" data-user-id="${user.id}">Editar cliente</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="drive" data-user-id="${user.id}" data-drive-link="${escapeHtml(user.drive_link || '')}" data-diagnostic-photos-link="${escapeHtml(user.diagnostic_photos_link || '')}">Editar pastas</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="excel" data-user-id="${user.id}">Exportar Excel</button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="sql" data-user-id="${user.id}">Exportar SQL</button>
+          </div>
+          <div class="status-grid">
+            ${user.progress.map(item => `
+              <div class="status-chip ${item.status}">
+                <strong>${escapeHtml(item.label)}</strong><br>
+                ${item.status === 'completed' ? 'Finalizado' : (item.sent ? `${item.count} registro(s)` : 'Pendente')}
+              </div>
+            `).join('')}
+          </div>
+        </article>
+      `).join('');
+    }
+
+    async function loadUserRecords(userId) {
+      activeAdminRecordsUserId = userId;
+      recordsPanel.hidden = false;
+      recordsTitle.textContent = 'Dados enviados';
+      recordsDescription.textContent = '';
+      recordsActions.innerHTML = '';
+      recordsContent.innerHTML = '<div class="alert alert-info mb-0">Carregando dados...</div>';
+
+      const result = await requestJson(`backend/api/admin_users.php?action=records&user_id=${encodeURIComponent(userId)}`);
+      renderUserRecords(result.user, result.sections, result.supplier_batches || []);
+    }
+
+    function renderUserRecords(user, recordSections, supplierBatches = []) {
+      recordsTitle.textContent = user.nome;
+      recordsDescription.textContent = `PIN ${user.pin} - visualizacao dos registros enviados por aba.`;
+      recordsActions.innerHTML = `
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-action="excel" data-user-id="${user.id}">Exportar Excel</button>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-action="sql" data-user-id="${user.id}">Exportar SQL</button>
+      `;
+
+      recordsContent.innerHTML = `
+        ${renderAdminSupplierBatches(supplierBatches)}
+        ${recordSections.map(section => `
+          <section class="mb-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-2">
+              <h3 class="h6 mb-0">${escapeHtml(section.label)}</h3>
+              <div class="d-flex flex-wrap gap-2">
+                <span class="section-state ${getSectionStatus({ finalized_at: section.finalized_at }, section.rows.length).key}">${getSectionStatus({ finalized_at: section.finalized_at }, section.rows.length).label}</span>
+                <span class="badge text-bg-secondary">${section.rows.length} registro(s)</span>
+              </div>
+            </div>
+            ${section.rows.length === 0 ? '<div class="alert alert-warning mb-0">Nenhum registro enviado nesta aba.</div>' : renderRecordsTable(section)}
+          </section>
+        `).join('')}
+      `;
+
+      recordsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderAdminSupplierBatches(batches) {
+      if (!batches.length) return '';
+
+      return `
+        <section class="mb-4">
+          <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-2">
+            <h3 class="h6 mb-0">Importacoes de industrias</h3>
+            <span class="badge text-bg-secondary">${batches.length} envio(s)</span>
+          </div>
+          <div class="records-table-wrap">
+            <table class="table records-table">
+              <thead>
+                <tr>
+                  <th>Arquivo</th>
+                  <th>Linhas</th>
+                  <th>Status</th>
+                  <th>Mensagem</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${batches.map(batch => `
+                  <tr>
+                    <td>${escapeHtml(batch.nome_arquivo)}</td>
+                    <td>${escapeHtml(batch.total_linhas)}</td>
+                    <td><span class="section-state ${supplierBatchStatusMeta(batch.status).className}">${supplierBatchStatusMeta(batch.status).label}</span></td>
+                    <td>${escapeHtml(batch.mensagem || '')}</td>
+                    <td>
+                      <div class="d-flex flex-wrap gap-2">
+                        ${batch.has_file ? `<a class="btn btn-sm btn-outline-secondary" href="backend/api/admin_users.php?action=download_supplier_batch&batch_id=${encodeURIComponent(batch.id)}">Baixar planilha</a>` : ''}
+                        <button class="btn btn-sm btn-primary" type="button" data-review-import="aprovado" data-batch-id="${batch.id}">Aprovar</button>
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-review-import="reprovado" data-batch-id="${batch.id}">Reprovar</button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }
+
+    function supplierBatchStatusMeta(status) {
+      const normalized = String(status || '').toLowerCase();
+
+      if (normalized === 'aprovado') {
+        return { label: 'Aprovado', className: 'completed' };
+      }
+
+      if (normalized === 'reprovado') {
+        return { label: 'Reprovado', className: 'missing' };
+      }
+
+      return { label: 'Em analise', className: 'sent' };
+    }
+
+    async function reviewSupplierBatch(batchId, status) {
+      const message = status === 'reprovado'
+        ? prompt('Motivo da reprovacao:')
+        : prompt('Mensagem opcional da aprovacao:', 'Importacao aprovada pelo admin.');
+
+      if (message === null) return;
+
+      const formData = new FormData();
+      formData.append('batch_id', batchId);
+      formData.append('status', status);
+      formData.append('message', message.trim());
+
+      await requestJson('backend/api/admin_users.php?action=review_supplier_batch', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (activeAdminRecordsUserId) {
+        await loadUserRecords(activeAdminRecordsUserId);
+      }
+    }
+
+    function renderRecordsTable(section) {
+      const fields = getDisplayFields(section.section);
+
+      return `
+        <div class="records-table-wrap">
+          <table class="table table-sm table-striped records-table">
+            <thead>
+              <tr>
+                ${fields.map(field => `<th>${escapeHtml(field.label)}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${section.rows.map(row => `
+                <tr>
+                  ${fields.map(field => `<td>${escapeHtml(row[field.name] ?? '')}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function downloadAdminExport(userId, type) {
+      window.location.href = `backend/api/admin_export.php?type=${encodeURIComponent(type)}&user_id=${encodeURIComponent(userId)}`;
+    }
+
+    async function updateDriveLink(userId, currentLink, currentDiagnosticPhotosLink = '') {
+      const driveLink = prompt('Link da pasta de plantas:', currentLink || '');
+
+      if (driveLink === null) return;
+
+      const diagnosticPhotosLink = prompt('Link da pasta de fotos do diagnostico:', currentDiagnosticPhotosLink || '');
+
+      if (diagnosticPhotosLink === null) return;
+
+      const formData = new FormData();
+      formData.append('user_id', userId);
+      formData.append('drive_link', driveLink.trim());
+      formData.append('diagnostic_photos_link', diagnosticPhotosLink.trim());
+
+      await requestJson('backend/api/admin_users.php?action=update_drive_link', {
+        method: 'POST',
+        body: formData
+      });
+
+      await loadUsers();
+    }
+
+    async function confirmActiveSection() {
+      if (!currentUser || clientRows.length === 0) return;
+
+      confirmSectionButton.disabled = true;
+      confirmSectionButton.textContent = 'Confirmando...';
+
+      try {
+        const formData = new FormData();
+        formData.append('section', activeSection.id);
+
+        const result = await requestJson('backend/api/section_status.php?action=finalize', {
+          method: 'POST',
+          body: formData
+        });
+
+        renderClientSectionStatus(result.status, clientRows.length);
+        resultBox.innerHTML = '<div class="alert alert-success mb-0">Aba marcada como finalizada.</div>';
+      } catch (error) {
+        resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+        renderClientSectionStatus(null, clientRows.length);
+      }
+    }
+
+    function syncSelectAll(groupName) {
+      const boxes = Array.from(form.querySelectorAll(`[data-checkbox-group="${groupName}"]`));
+      const selectAll = form.querySelector(`[data-select-all="${groupName}"]`);
+      if (!selectAll || boxes.length === 0) return;
+
+      const checked = boxes.filter(input => input.checked).length;
+      selectAll.checked = checked === boxes.length;
+      selectAll.indeterminate = checked > 0 && checked < boxes.length;
+    }
+
+    function validateCheckboxGroups() {
+      const requiredGroups = new Set(Array.from(form.querySelectorAll('[data-required-group="true"]')).map(input => input.dataset.checkboxGroup));
+
+      for (const groupName of requiredGroups) {
+        if (!form.querySelector(`[data-checkbox-group="${groupName}"]:checked`)) {
+      return false;
+    }
+
+    function syncBulkSelectAll(row, groupName) {
+      const boxes = Array.from(row.querySelectorAll(`[data-field="${groupName}"]`));
+      const selectAll = row.querySelector(`[data-bulk-select-all="${groupName}"]`);
+      if (!selectAll || boxes.length === 0) return;
+
+      const checked = boxes.filter(input => input.checked).length;
+      selectAll.checked = checked === boxes.length;
+      selectAll.indeterminate = checked > 0 && checked < boxes.length;
+    }
+      }
+
+      return true;
+    }
+
+    const fieldHelp = {
+      'dados_loja.nome_fantasia': 'Informe o nome comercial pelo qual a loja e conhecida.',
+      'dados_loja.cnpj': 'Digite somente os 14 numeros do CNPJ da loja.',
+      'dados_loja.razao_social': 'Informe o nome empresarial registrado da loja.',
+      'dados_loja.sigla_loja': 'Informe a sigla ou identificador curto usado para reconhecer a loja.',
+      'dados_loja.formato': 'Descreva o formato da unidade, como supermercado, atacarejo ou conveniencia.',
+      'dados_loja.bandeira': 'Informe a bandeira ou marca comercial da loja.',
+      'dados_loja.cep': 'Digite somente os 8 numeros do CEP da loja.',
+      'dados_loja.endereco': 'Informe logradouro, numero, bairro, cidade e estado da loja.',
+      'dados_loja.complemento': 'Inclua bloco, sala, referencia ou outra informacao adicional do endereco.',
+      'dados_loja.regiao': 'Informe a regiao comercial ou geografica da loja.',
+      'dados_loja.faturamento': 'Informe o faturamento da loja usando numeros. Utilize ponto para separar os centavos.',
+      'categorias.categoria': 'Informe o nome da categoria quando houver. Voce tambem pode preencher apenas setor ou departamento.',
+      'categorias.setor': 'Informe o setor, mesmo quando nao houver categoria vinculada.',
+      'categorias.departamento': 'Informe o departamento, mesmo quando nao houver categoria ou setor vinculado.',
+      'usuarios_internos.nome': 'Informe o nome completo do usuario interno.',
+      'usuarios_internos.email': 'Informe o e-mail profissional do usuario interno.',
+      'usuarios_internos.whatsapp': 'Informe o numero de WhatsApp com DDD.',
+      'usuarios_internos.area': 'Informe a area ou equipe em que o usuario trabalha.',
+      'gerentes_loja.nome': 'Informe o nome completo do gerente.',
+      'gerentes_loja.email': 'Informe o e-mail profissional do gerente.',
+      'gerentes_loja.whatsapp': 'Informe o numero de WhatsApp do gerente com DDD.',
+      'gerentes_loja.loja_responsavel': 'Informe a loja ou as lojas acompanhadas pelo gerente.',
+      'industrias.cnpj_industria': 'Digite somente os 14 numeros do CNPJ da industria.',
+      'industrias.razao_social': 'Informe o nome empresarial registrado da industria.',
+      'industrias.nome_fantasia': 'Informe o nome comercial da industria.',
+      'industrias.codigo_interno': 'Informe o codigo usado internamente para identificar a industria.',
+      'industrias.nome_representante': 'Informe o nome do representante comercial da industria.',
+      'industrias.telefone_representante': 'Informe o telefone de contato do representante com DDD.',
+      'industrias.email_representante': 'Informe o e-mail profissional do representante.',
+      'industrias.whatsapp_representante': 'Informe o WhatsApp do representante com DDD.',
+      'industrias.segmento': 'Informe o segmento de atuacao da industria.',
+      'industrias.faturamento': 'Informe o valor de faturamento usando numeros. Utilize ponto para separar os centavos.',
+      'dados_bancarios.favorecido': 'Nome completo do favorecido/titular da conta.',
+      'dados_bancarios.banco': 'Nome ou numero do banco.',
+      'dados_bancarios.agencia': 'Numero da agencia, sem o digito verificador se houver.',
+      'dados_bancarios.conta_corrente': 'Numero da conta corrente, com digito se houver.',
+      'dados_bancarios.cnpj': 'CNPJ do favorecido.',
+      'dados_bancarios.chave_pix': 'Chave Pix usada para pagamentos.',
+      'dados_bancarios.tipo_pagamento': 'Marque todas as formas de pagamento aceitas. Use Selecionar todos quando todas as opcoes forem validas.',
+      'dados_bancarios.observacoes': 'Inclua detalhes adicionais sobre pagamentos, prazos ou regras financeiras.',
+      'plantas_loja.observacoes': 'Inclua observacoes sobre as plantas enviadas ou pontos que precisam de atencao.',
+      'diagnostico_loja.observacoes': 'Inclua observacoes sobre fotos, pontos de atencao ou informacoes levantadas no diagnostico.',
+      'ativos_fisicos.nome_ativo': 'Informe o nome do equipamento, material ou outro ativo fisico.',
+      'ativos_fisicos.valor_custo': 'Informe o custo unitario do ativo. Utilize ponto para separar os centavos.',
+      'ativos_fisicos.valor_venda': 'Informe o valor de venda do ativo. Utilize ponto para separar os centavos.',
+      'ativos_fisicos.loja': 'Informe a loja em que o ativo esta localizado.',
+      'ativos_fisicos.quantidade': 'Informe quantas unidades desse ativo existem.',
+      'ativos_fisicos.observacoes': 'Inclua estado de conservacao, localizacao ou outra observacao relevante.',
+      'ativos_digitais.nome_ativo': 'Informe o nome do ativo digital, canal ou recurso online.',
+      'ativos_digitais.valor_custo': 'Informe o custo do ativo digital. Utilize ponto para separar os centavos.',
+      'ativos_digitais.valor_venda': 'Informe o valor de venda do ativo digital. Utilize ponto para separar os centavos.',
+      'ativos_digitais.loja_digital': 'Informe a loja digital, canal ou plataforma relacionada ao ativo.',
+      'alcadas.nome': 'Informe o nome da pessoa, cargo ou nivel de aprovacao.',
+      'alcadas.alcada_percentual': 'Informe o percentual limite da alcada usando numeros.'
+    };
+
+    function getHelpTutorialSteps() {
+      const steps = [{
+        title: activeSection.label,
+        description: activeSection.driveLink
+          ? 'Nesta aba, acesse a pasta do Drive pelo botao disponivel no formulario e envie as plantas da loja. Depois, preencha as observacoes quando necessario.'
+          : activeSection.diagnosticLink
+            ? 'Nesta aba, acesse a pasta de fotos do diagnostico pelo botao disponivel e registre observacoes quando necessario.'
+          : 'Veja o que deve ser informado em cada campo desta aba. Os campos marcados como obrigatorios precisam ser preenchidos antes de salvar.'
+      }];
+
+      activeSection.fields.forEach(field => {
+        const requiredText = field.required ? ' Este campo e obrigatorio.' : ' Este campo e opcional.';
+        steps.push({
+          title: field.label,
+          description: (fieldHelp[`${activeSection.id}.${field.name}`] || `Informe ${field.label.toLowerCase()}.`) + requiredText
+        });
+      });
+
+      if (activeSection.supplierImport) {
+        steps.push({
+          title: 'Importacao de industrias',
+          description: 'Se tiver muitas industrias, baixe o template, mantenha os nomes das colunas e envie a planilha CSV ou XLSX. O envio fica Em analise para o time conferir.'
+        });
+      }
+
+      steps.push({
+        title: 'Salvar e finalizar',
+        description: 'Salve os registros preenchidos. Quando terminar toda a aba, clique em Confirmar finalizado. Se adicionar ou editar um registro depois, a aba volta automaticamente para Em preenchimento.'
+      });
+
+      return steps;
+    }
+
+    function renderHelpTutorialStep() {
+      const steps = getHelpTutorialSteps();
+      const step = steps[helpTutorialStep];
+
+      helpTutorialTitle.textContent = `Ajuda: ${activeSection.label}`;
+      helpTutorialProgress.textContent = `Passo ${helpTutorialStep + 1} de ${steps.length}`;
+      helpTutorialStepTitle.textContent = step.title;
+      helpTutorialStepDescription.textContent = step.description;
+      previousHelpTutorialButton.disabled = helpTutorialStep === 0;
+      nextHelpTutorialButton.textContent = helpTutorialStep === steps.length - 1 ? 'Concluir' : 'Proximo';
+    }
+
+    function openHelpTutorial() {
+      helpTutorialStep = 0;
+      renderHelpTutorialStep();
+      helpTutorialDialog.showModal();
+    }
+
+    function closeHelpTutorial() {
+      if (helpTutorialDialog.open) {
+        helpTutorialDialog.close();
+      }
+    }
+
+    function isTradebookUser(user) {
+      return (user?.nivel || '') === 'tradebook';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function formatDate(value) {
+      if (!value) return '-';
+      const date = new Date(value.replace(' ', 'T'));
+      return Number.isNaN(date.getTime()) ? value : date.toLocaleString('pt-BR');
+    }
+
+    loginForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      loginResult.innerHTML = '<div class="alert alert-info mb-0">Entrando...</div>';
+
+      try {
+        const formData = new FormData(loginForm);
+        formData.set('pin', formData.get('pin').toUpperCase().trim());
+
+        const result = await requestJson('backend/api/auth.php?action=login', {
+          method: 'POST',
+          body: formData
+        });
+
+        loginForm.reset();
+        loginResult.innerHTML = '';
+
+        if (result.role === 'admin') {
+          setView('admin');
+          await loadUsers();
+        } else if (isTradebookUser(result.user)) {
+          window.location.href = 'tradebook.html';
+        } else {
+          setView('user', { user: result.user });
+          renderTabs();
+          renderSection(activeSection);
+          await loadClientRecords();
+        }
+      } catch (error) {
+        loginResult.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
+    createUserForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      createUserResult.innerHTML = '<div class="alert alert-info mb-0">Gerando PIN...</div>';
+
+      try {
+        const result = await requestJson('backend/api/admin_users.php?action=create', {
+          method: 'POST',
+          body: new FormData(createUserForm)
+        });
+
+        safeReset(createUserForm);
+        closeCreateUserModal();
+        createUserResult.innerHTML = `
+          <div class="alert alert-success mb-0">
+            ${result.message}<br>
+            <strong>${escapeHtml(result.user.nome)}</strong>: <span class="pin-code">${escapeHtml(result.user.pin)}</span>
+          </div>
+        `;
+        await loadUsers();
+      } catch (error) {
+        createUserResult.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
+    refreshUsersButton.addEventListener('click', async () => {
+      try {
+        await loadUsers();
+      } catch (error) {
+        usersList.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
+    userSearchInput.addEventListener('input', () => {
+      renderUsers();
+    });
+
+    userProfileFilter.addEventListener('change', () => {
+      renderUsers();
+    });
+
+    usersList.addEventListener('click', async event => {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+
+      const userId = button.dataset.userId;
+
+      try {
+        if (button.dataset.action === 'records') {
+          await loadUserRecords(userId);
+          return;
+        }
+
+        if (button.dataset.action === 'drive') {
+          await updateDriveLink(userId, button.dataset.driveLink || '', button.dataset.diagnosticPhotosLink || '');
+          return;
+        }
+
+        if (button.dataset.action === 'editar-cliente') {
+          openEditUserModal(Number(userId));
+          return;
+        }
+
+        downloadAdminExport(userId, button.dataset.action);
+      } catch (error) {
+        recordsPanel.hidden = false;
+        recordsContent.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
+    recordsActions.addEventListener('click', event => {
+      const button = event.target.closest('[data-action]');
+      if (!button) return;
+
+      downloadAdminExport(button.dataset.userId, button.dataset.action);
+    });
+
+    recordsContent.addEventListener('click', async event => {
+      const button = event.target.closest('[data-review-import]');
+      if (!button) return;
+
+      try {
+        await reviewSupplierBatch(button.dataset.batchId, button.dataset.reviewImport);
+      } catch (error) {
+        recordsContent.insertAdjacentHTML('afterbegin', `<div class="alert alert-danger">${error.message}</div>`);
+      }
+    });
+
+    openCreateUserModalButton.addEventListener('click', () => {
+      openCreateUserModal();
+    });
+
+    closeCreateUserModalButton.addEventListener('click', () => {
+      closeCreateUserModal();
+    });
+
+    cancelCreateUserModalButton.addEventListener('click', () => {
+      closeCreateUserModal();
+    });
+
+    selectAllUserSections.addEventListener('change', () => {
+      createUserSections.querySelectorAll('[data-user-section]').forEach(input => {
+        input.checked = selectAllUserSections.checked;
+      });
+      syncCreateUserSelectAll();
+    });
+
+    createUserSections.addEventListener('change', event => {
+      if (event.target.closest('[data-user-section]')) {
+        syncCreateUserSelectAll();
+      }
+    });
+
+    document.getElementById('closeEditUserModalButton').addEventListener('click', () => {
+      closeEditUserModal();
+    });
+
+    document.getElementById('cancelEditUserModalButton').addEventListener('click', () => {
+      closeEditUserModal();
+    });
+
+    selectAllEditUserSections.addEventListener('change', () => {
+      editUserSections.querySelectorAll('[data-edit-user-section]').forEach(input => {
+        input.checked = selectAllEditUserSections.checked;
+      });
+      syncEditUserSelectAll();
+    });
+
+    editUserSections.addEventListener('change', event => {
+      if (event.target.closest('[data-edit-user-section]')) {
+        syncEditUserSelectAll();
+      }
+    });
+
+    editUserForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const submitButton = editUserForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+
+      try {
+        await requestJson('backend/api/admin_users.php?action=update_settings', {
+          method: 'POST',
+          body: new FormData(editUserForm)
+        });
+        closeEditUserModal();
+        await loadUsers();
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    logoutButton.addEventListener('click', async () => {
+      await requestJson('backend/api/auth.php?action=logout', { method: 'POST' });
+      setView('login');
+    });
+
+    tabs.addEventListener('click', event => {
+      const button = event.target.closest('[data-section]');
+      if (!button) return;
+
+      tabs.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+      button.classList.add('active');
+
+      const section = sections.find(item => item.id === button.dataset.section);
+      renderSection(section);
+      setEntryMode(entryMode);
+      loadClientRecords();
+    });
+
+    refreshClientRecordsButton.addEventListener('click', () => {
+      loadClientRecords();
+    });
+
+    confirmSectionButton.addEventListener('click', () => {
+      confirmActiveSection();
+    });
+
+    helpTutorialButton.addEventListener('click', () => {
+      openHelpTutorial();
+    });
+
+    closeHelpTutorialButton.addEventListener('click', () => {
+      closeHelpTutorial();
+    });
+
+    previousHelpTutorialButton.addEventListener('click', () => {
+      if (helpTutorialStep === 0) return;
+
+      helpTutorialStep--;
+      renderHelpTutorialStep();
+    });
+
+    nextHelpTutorialButton.addEventListener('click', () => {
+      const steps = getHelpTutorialSteps();
+
+      if (helpTutorialStep === steps.length - 1) {
+        closeHelpTutorial();
+        return;
+      }
+
+      helpTutorialStep++;
+      renderHelpTutorialStep();
+    });
+
+    clientRecordsContent.addEventListener('click', event => {
+      const button = event.target.closest('[data-edit-client-row]');
+      if (!button) return;
+
+      editClientRow(Number(button.dataset.editClientRow));
+    });
+
+    form.addEventListener('click', event => {
+      const uploadButton = event.target.closest('[data-upload-suppliers]');
+      if (uploadButton) {
+        uploadSupplierFile();
+        return;
+      }
+
+      const button = event.target.closest('[data-cancel-edit]');
+      if (!button) return;
+
+      cancelEditMode();
+    });
+
+    form.addEventListener('change', event => {
+      const selectAll = event.target.closest('[data-select-all]');
+      if (selectAll) {
+        form.querySelectorAll(`[data-checkbox-group="${selectAll.dataset.selectAll}"]`).forEach(input => {
+          input.checked = selectAll.checked;
+        });
+        syncSelectAll(selectAll.dataset.selectAll);
+        return;
+      }
+
+      const checkbox = event.target.closest('[data-checkbox-group]');
+      if (checkbox) {
+        syncSelectAll(checkbox.dataset.checkboxGroup);
+      }
+    });
+
+    form.addEventListener('input', event => {
+      normalizeNumericInput(event.target);
+    });
+
+    singleModeButton.addEventListener('click', () => {
+      setEntryMode('single');
+    });
+
+    bulkModeButton.addEventListener('click', () => {
+      setEntryMode('bulk');
+    });
+
+    addBulkRowButton.addEventListener('click', () => {
+      addBulkRows(1);
+    });
+
+    clearBulkButton.addEventListener('click', () => {
+      renderBulkGrid(activeSection);
+      resultBox.innerHTML = '';
+    });
+
+    bulkTable.addEventListener('click', event => {
+      const button = event.target.closest('[data-remove-row]');
+      if (!button) return;
+
+      const row = button.closest('[data-row]');
+      const rows = bulkTable.querySelectorAll('[data-row]');
+
+      if (rows.length === 1) {
+        row.querySelectorAll('[data-field]').forEach(field => {
+          field.value = '';
+        });
+        return;
+      }
+
+      row.remove();
+      renumberBulkRows();
+    });
+
+    bulkTable.addEventListener('input', event => {
+      normalizeNumericInput(event.target);
+    });
+
+    bulkTable.addEventListener('change', event => {
+      const selectAll = event.target.closest('[data-bulk-select-all]');
+      if (selectAll) {
+        const row = selectAll.closest('[data-row]');
+        row.querySelectorAll(`[data-field="${selectAll.dataset.bulkSelectAll}"]`).forEach(input => {
+          input.checked = selectAll.checked;
+        });
+        syncBulkSelectAll(row, selectAll.dataset.bulkSelectAll);
+        return;
+      }
+
+      const checkbox = event.target.closest('[data-checkbox-field]');
+      if (checkbox) {
+        syncBulkSelectAll(checkbox.closest('[data-row]'), checkbox.dataset.field);
+      }
+    });
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!validateCheckboxGroups()) {
+        resultBox.innerHTML = '<div class="alert alert-danger mb-0">Selecione pelo menos uma opcao obrigatoria.</div>';
+        return;
+      }
+
+      resultBox.innerHTML = '<div class="alert alert-info mb-0">Salvando...</div>';
+
+      try {
+        const formData = new FormData(form);
+        activeSection.fields.forEach(field => {
+          if (field.type === 'checkbox-group') {
+            formData.delete(`${field.name}[]`);
+            const value = Array.from(form.querySelectorAll(`[data-checkbox-group="${field.name}"]:checked`))
+              .map(input => input.value)
+              .join(', ');
+            formData.set(field.name, value);
+          }
+        });
+
+        const result = await requestJson('backend/api/save_onboarding.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        resultBox.innerHTML = `
+          <div class="alert alert-success mb-0">${result.message}</div>
+        `;
+        form.reset();
+        const cancelButton = form.querySelector('[data-cancel-edit]');
+        if (cancelButton) {
+          cancelButton.hidden = true;
+        }
+        await loadClientRecords();
+      } catch (error) {
+        resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
+    bulkForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      resultBox.innerHTML = '<div class="alert alert-info mb-0">Salvando grade...</div>';
+
+      try {
+        const formData = new FormData();
+        formData.append('section', activeSection.id);
+        formData.append('rows_json', JSON.stringify(collectBulkRows()));
+
+        const result = await requestJson('backend/api/save_onboarding.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        resultBox.innerHTML = `<div class="alert alert-success mb-0">${result.message}</div>`;
+        renderBulkGrid(activeSection);
+        await loadClientRecords();
+      } catch (error) {
+        resultBox.innerHTML = `<div class="alert alert-danger mb-0">${error.message}</div>`;
+      }
+    });
+
+    async function boot() {
+      renderCreateUserSections();
+      renderTabs();
+      renderSection(activeSection);
+      setEntryMode('single');
+
+      try {
+        const result = await requestJson('backend/api/auth.php?action=status');
+
+        if (!result.authenticated) {
+          setView('login');
+          return;
+        }
+
+        if (result.role === 'admin') {
+          setView('admin');
+          await loadUsers();
+          return;
+        }
+
+        if (isTradebookUser(result.user)) {
+          window.location.href = 'tradebook.html';
+          return;
+        }
+
+        setView('user', { user: result.user });
+        renderTabs();
+        renderSection(activeSection);
+        await loadClientRecords();
+      } catch (error) {
+        setView('login');
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tradebook</title>
+  <link rel="icon" type="image/svg+xml" href="assets/oboarding.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #330167;
+      --yellow: #f9cc3d;
+      --ink: #171627;
+      --muted: #666680;
+      --line: #e8e8ec;
+      --surface: #f6f7fb;
+      --shadow: 0 18px 45px rgba(23, 22, 39, .10);
+    }
+
+    * { letter-spacing: 0; }
+
+    body {
+      background: var(--surface);
+      color: var(--ink);
+      font-family: "Poppins", "Segoe UI", system-ui, sans-serif;
+    }
+
+    h1, h2, h3, h4, .badge {
+      font-family: "Montserrat", "Poppins", sans-serif;
+    }
+
+    .hero {
+      background: #fff;
+      border-bottom: 3px solid var(--yellow);
+      min-height: 320px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      background: linear-gradient(135deg, rgba(51, 1, 103, .08), rgba(249, 204, 61, .18));
+      bottom: 0;
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 42%;
+    }
+
+    .hero-inner {
+      max-width: 1180px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .client-photo {
+      aspect-ratio: 16 / 10;
+      background: linear-gradient(135deg, #330167, #026ebd);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      object-fit: cover;
+      width: 100%;
+    }
+
+    .shell { max-width: 1180px; }
+
+    .store-section {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .store-header {
+      border-bottom: 1px solid var(--line);
+      padding: 1.25rem;
+    }
+
+    .media-group {
+      border-top: 1px solid var(--line);
+      padding: 1.25rem;
+    }
+
+    .media-group:first-child { border-top: 0; }
+
+    .asset-grid {
+      display: grid;
+      gap: .75rem;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    }
+
+    .asset-card {
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--media-color);
+      border-radius: 8px;
+      min-height: 142px;
+      padding: 1rem;
+    }
+
+    .asset-card.unavailable {
+      opacity: .48;
+    }
+
+    .media-title {
+      align-items: center;
+      display: flex;
+      font-weight: 900;
+      gap: .5rem;
+      margin-bottom: .85rem;
+    }
+
+    .media-dot {
+      background: var(--media-color);
+      border-radius: 999px;
+      height: .8rem;
+      width: .8rem;
+    }
+
+    .metric {
+      color: var(--muted);
+      font-size: .84rem;
+      margin-top: .35rem;
+    }
+
+    .empty {
+      border: 1px dashed #cfc6dc;
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    @media (max-width: 767.98px) {
+      .hero::after { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container hero-inner py-4 py-lg-5">
+      <div id="heroContent" class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <span class="badge text-bg-light mb-3">Tradebook</span>
+          <h1 class="display-5 fw-bold mb-3">Carregando apresentacao...</h1>
+          <p class="lead text-muted mb-0">Aguarde enquanto buscamos os ativos disponiveis.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container shell py-4 py-lg-5">
+    <div id="status"></div>
+    <div id="stores" class="d-grid gap-4"></div>
+  </main>
+
+  <script>
+    const mediaTypes = {
+      fisico: { label: 'Fisico', color: '#0ea5e9' },
+      grafico: { label: 'Grafico', color: '#f59e0b' },
+      midias: { label: 'Midias', color: '#db2777' },
+      material_fornecedor: { label: 'Material fornecedor', color: '#16a34a' },
+      digital: { label: 'Digital', color: '#7c3aed' }
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function money(value) {
+      return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function imageMarkup(src, alt) {
+      if (!src) {
+        return '<div class="client-photo"></div>';
+      }
+      return `<img class="client-photo" src="${escapeHtml(src)}" alt="${escapeHtml(alt)}">`;
+    }
+
+    function groupByMedia(assets) {
+      return assets.reduce((groups, item) => {
+        const key = item.tipo_midia || 'outros';
+        groups[key] = groups[key] || [];
+        groups[key].push(item);
+        return groups;
+      }, {});
+    }
+
+    function renderHero(data) {
+      document.title = `${data.tradebook.cliente_nome} - Tradebook`;
+      document.querySelector('#heroContent').innerHTML = `
+        <div class="col-lg-7">
+          <span class="badge text-bg-light mb-3">Tradebook</span>
+          <h1 class="display-5 fw-bold mb-3">${escapeHtml(data.tradebook.cliente_nome)}</h1>
+          <p class="lead text-muted mb-0">${escapeHtml(data.tradebook.nome)}</p>
+        </div>
+        <div class="col-lg-5">
+          ${imageMarkup(data.tradebook.cliente_foto, data.tradebook.cliente_nome)}
+        </div>
+      `;
+    }
+
+    function renderStores(lojas) {
+      const stores = document.querySelector('#stores');
+      if (!lojas.length) {
+        stores.innerHTML = '<div class="empty">Este tradebook ainda nao possui lojas publicadas.</div>';
+        return;
+      }
+
+      stores.innerHTML = lojas.map(loja => {
+        const groups = groupByMedia((loja.ativos || []).filter(item => Number(item.disponivel_para_trade) === 1));
+        const groupHtml = Object.entries(groups).map(([type, assets]) => {
+          const media = mediaTypes[type] || { label: type, color: '#64748b' };
+          return `
+            <section class="media-group" style="--media-color:${media.color}">
+              <div class="media-title"><span class="media-dot"></span>${escapeHtml(media.label)}</div>
+              <div class="asset-grid">
+                ${assets.map(asset => `
+                  <article class="asset-card" style="--media-color:${media.color}">
+                    <h3 class="h6 fw-bold mb-2">${escapeHtml(asset.nome_ativo)}</h3>
+                    <div class="metric">Quantidade: <strong>${escapeHtml(asset.quantidade || '-')}</strong></div>
+                    <div class="metric">Medidas: <strong>${escapeHtml(asset.medidas || '-')}</strong></div>
+                    <div class="metric">Valor de venda: <strong>${money(asset.valor_venda)}</strong></div>
+                  </article>
+                `).join('')}
+              </div>
+            </section>
+          `;
+        }).join('');
+
+        return `
+          <article class="store-section">
+            <header class="store-header">
+              <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+                <div>
+                  <h2 class="h4 fw-bold mb-1">${escapeHtml(loja.nome)}</h2>
+                  <div class="text-muted">${escapeHtml(loja.endereco || (loja.tipo === 'digital' ? 'Loja digital' : 'Loja fisica'))}</div>
+                </div>
+                <span class="badge text-bg-light align-self-md-start">${loja.tipo === 'digital' ? 'Digital' : 'Fisica'}</span>
+              </div>
+            </header>
+            ${groupHtml || '<div class="empty m-3">Nenhum ativo marcado como disponivel para trade nesta loja.</div>'}
+          </article>
+        `;
+      }).join('');
+    }
+
+    async function boot() {
+      const token = new URLSearchParams(window.location.search).get('token') || '';
+      if (!token) {
+        document.querySelector('#status').innerHTML = '<div class="alert alert-danger">Link invalido.</div>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`backend/api/tb_public.php?action=view&token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+        if (!response.ok || data.success === false) {
+          throw new Error(data.message || 'Nao foi possivel carregar o tradebook.');
+        }
+        renderHero(data);
+        renderStores(data.lojas || []);
+      } catch (error) {
+        document.querySelector('#status').innerHTML = `<div class="alert alert-danger">${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Segredos / config local
+backend/config/config.local.php
+
+# Exports gerados
+*.xlsx
+*.sql.bak
+
+# Sistema
+.DS_Store
+Thumbs.db

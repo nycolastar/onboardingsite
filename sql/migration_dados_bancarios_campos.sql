@@ -1,0 +1,9 @@
+USE onboarding_system;
+
+ALTER TABLE dados_bancarios
+    ADD COLUMN IF NOT EXISTS favorecido VARCHAR(255) NULL AFTER usuario_id,
+    ADD COLUMN IF NOT EXISTS banco VARCHAR(120) NULL AFTER favorecido,
+    ADD COLUMN IF NOT EXISTS agencia VARCHAR(40) NULL AFTER banco,
+    ADD COLUMN IF NOT EXISTS conta_corrente VARCHAR(40) NULL AFTER agencia,
+    ADD COLUMN IF NOT EXISTS cnpj VARCHAR(20) NULL AFTER conta_corrente,
+    ADD COLUMN IF NOT EXISTS chave_pix VARCHAR(255) NULL AFTER cnpj;

@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tradebook - Construção Guiada</title>
+  <link rel="icon" type="image/svg+xml" href="assets/oboarding.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #330167;
+      --brand-soft: #f0eaff;
+      --yellow: #f9cc3d;
+      --blue: #026ebd;
+      --pink: #c90e67;
+      --ink: #1a1a2e;
+      --muted: #666680;
+      --line: #e8e8ec;
+      --surface: #f6f7fb;
+      --card: #ffffff;
+      --ok: #067647;
+      --warn: #b54708;
+      --danger: #b42318;
+      --shadow: 0 4px 24px rgba(51, 1, 103, .10);
+    }
+
+    * { letter-spacing: 0; }
+
+    body {
+      background: linear-gradient(180deg, #fff 0, var(--surface) 360px);
+      color: var(--ink);
+      font-family: "Poppins", "Segoe UI", system-ui, sans-serif;
+    }
+
+    h1, h2, h3, h4, h5, h6, .btn, .form-label, .nav-link, .badge {
+      font-family: "Montserrat", "Poppins", sans-serif;
+    }
+
+    [hidden] { display: none !important; }
+
+    .app-shell { max-width: 1440px; }
+
+    .topbar {
+      background: #fff;
+      border-bottom: 3px solid var(--yellow);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand-logo {
+      height: 44px;
+      object-fit: contain;
+      width: 150px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--brand);
+    }
+
+    .section-description {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .nav-pills .nav-link {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-left: 4px solid transparent;
+      border-radius: 8px;
+      color: var(--ink);
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .nav-pills .nav-link.active {
+      background: var(--brand-soft);
+      border-left-color: var(--brand);
+      color: var(--brand);
+    }
+
+    .form-control, .form-select {
+      border-color: var(--line);
+      border-radius: 8px;
+      min-height: 42px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 .2rem rgba(51, 1, 103, .12);
+    }
+
+    .btn {
+      border-radius: 8px;
+      font-weight: 800;
+      min-height: 40px;
+    }
+
+    .btn-primary {
+      --bs-btn-bg: var(--yellow);
+      --bs-btn-border-color: var(--yellow);
+      --bs-btn-color: var(--brand);
+      --bs-btn-hover-bg: #e8bb30;
+      --bs-btn-hover-border-color: #e8bb30;
+      --bs-btn-hover-color: var(--brand);
+    }
+
+    .btn-outline-secondary {
+      --bs-btn-color: var(--brand);
+      --bs-btn-border-color: var(--line);
+      --bs-btn-hover-bg: var(--brand-soft);
+      --bs-btn-hover-border-color: var(--brand);
+      --bs-btn-hover-color: var(--brand);
+      background: #fff;
+    }
+
+    .media-dot {
+      border-radius: 999px;
+      display: inline-block;
+      height: .75rem;
+      margin-right: .35rem;
+      vertical-align: -1px;
+      width: .75rem;
+    }
+
+    .media-badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 800;
+      gap: .25rem;
+      padding: .24rem .55rem;
+      white-space: nowrap;
+    }
+
+    .media-fisico { background: #e8f5ff; color: #075985; }
+    .media-grafico { background: #fff4de; color: #92400e; }
+    .media-midias { background: #fce7f3; color: #9d174d; }
+    .media-material_fornecedor { background: #ecfdf3; color: #067647; }
+    .media-digital { background: #ede9fe; color: #5b21b6; }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: auto;
+    }
+
+    .table { margin: 0; min-width: 820px; }
+    .table th {
+      background: var(--surface);
+      color: var(--brand);
+      font-size: .76rem;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .table td { vertical-align: middle; }
+
+    .tradebook-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .tradebook-card:hover {
+      border-color: var(--brand);
+    }
+
+    .tradebook-card.active {
+      border-color: var(--brand);
+      background: var(--brand-soft);
+      box-shadow: inset 0 0 0 1px var(--brand);
+    }
+
+    .store-list {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+    }
+
+    .store-button {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-left: 4px solid transparent;
+      border-radius: 8px;
+      color: var(--ink);
+      padding: .75rem;
+      text-align: left;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .store-button.active {
+      background: var(--brand-soft);
+      border-left-color: var(--brand);
+    }
+
+    .compact-input { max-width: 90px; }
+    
+    .empty-state {
+      border: 1px dashed #cfc6dc;
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* Estilização da área de colar imagem */
+    .paste-box {
+      border: 2px dashed #cfc6dc;
+      border-radius: 12px;
+      background: #faf9fc;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    
+    .paste-box.has-image {
+      border-style: solid;
+      border-color: var(--ok);
+      background: #fff;
+    }
+
+    /* Passos do Roadmap */
+    .roadmap-steps {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .roadmap-step {
+      flex: 1;
+      text-align: center;
+      padding: 0.75rem;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .roadmap-step.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="menuLateral" aria-labelledby="menuLateralLabel">
+    <div class="offcanvas-header border-bottom">
+      <h5 class="offcanvas-title" id="menuLateralLabel">Navegação</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <nav class="nav nav-pills flex-column gap-2" id="mainTabs">
+        <button class="nav-link" type="button" data-view="catalogo" data-bs-dismiss="offcanvas">📦 Data Lake (Ativos)</button>
+        <hr class="my-2">
+        <button class="nav-link active" type="button" data-view="clientes" data-bs-dismiss="offcanvas">1. Cliente e Lojas</button>
+        <button class="nav-link" type="button" data-view="template" data-bs-dismiss="offcanvas">2. Template do Tradebook</button>
+        <button class="nav-link" type="button" data-view="lojas" data-bs-dismiss="offcanvas">3. Inventário das Lojas</button>
+      </nav>
+      
+      <div class="panel p-3 mt-4">
+        <label class="form-label" for="currentTradebookSelect">Tradebook Ativo</label>
+        <select class="form-select" id="currentTradebookSelect">
+          <option value="">Nenhum tradebook selecionado</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="container app-shell py-3">
+      <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
+            ☰ Menu
+          </button>
+          <img class="brand-logo" src="assets/mc.png" alt="Meu Cliente">
+          <div>
+            <h1 class="h3 mb-1">Tradebook</h1>
+            <small class="text-muted" id="userGreeting">Verificando acesso...</small>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <span class="badge text-bg-light" id="selectedTradebookBadge">Nenhum tradebook selecionado</span>
+          <a class="btn btn-outline-secondary btn-sm" href="index.html">Onboarding</a>
+          <button class="btn btn-outline-secondary btn-sm" type="button" id="logoutButton">Sair</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container app-shell py-4">
+    <div id="guardMessage" class="alert alert-info">Verificando acesso...</div>
+
+    <section id="tradebookArea" hidden>
+      <div id="globalResult" class="mb-3"></div>
+
+      <div class="roadmap-steps">
+        <div class="roadmap-step active" data-step-target="clientes">1. Cliente e Lojas</div>
+        <div class="roadmap-step" data-step-target="template">2. Template</div>
+        <div class="roadmap-step" data-step-target="lojas">3. Inventário Final</div>
+      </div>
+
+      <div class="row g-3">
+        <section class="col-12">
+
+          <section class="panel p-4" id="catalogoView" hidden>
+            <div class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4">
+              <div>
+                <div class="section-title">Data Lake de Ativos</div>
+                <p class="section-description">Cadastre os ativos universais aqui para reutilizá-los nas lojas e templates.</p>
+              </div>
+              <button class="btn btn-outline-secondary" type="button" id="refreshCatalogButton">Atualizar</button>
+            </div>
+
+            <form class="row g-3 mb-4" id="catalogForm">
+              <input type="hidden" name="id" id="catalogId">
+              <div class="col-md-5">
+                <label class="form-label" for="catalogName">Ativo</label>
+                <input class="form-control" id="catalogName" name="nome_ativo" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label" for="catalogType">Tipo de mídia</label>
+                <select class="form-select" id="catalogType" name="tipo_midia" required></select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label" for="catalogCost">Custo</label>
+                <input class="form-control" id="catalogCost" name="valor_custo" type="number" step="0.01" min="0" value="0">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label" for="catalogSale">Venda</label>
+                <input class="form-control" id="catalogSale" name="valor_venda" type="number" step="0.01" min="0" value="0">
+              </div>
+              <div class="col-md-8">
+                <label class="form-label" for="catalogMeasures">Medidas</label>
+                <input class="form-control" id="catalogMeasures" name="medidas" placeholder="Ex: 1,20m x 0,80m">
+              </div>
+              <div class="col-md-4 d-flex align-items-end gap-2">
+                <button class="btn btn-primary flex-fill" type="submit" id="catalogSubmitButton">Cadastrar ativo</button>
+                <button class="btn btn-outline-secondary" type="button" id="cancelCatalogEditButton" hidden>Cancelar</button>
+              </div>
+            </form>
+
+            <div class="table-wrap">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th>Ativo</th>
+                    <th>Tipo</th>
+                    <th>Custo</th>
+                    <th>Venda</th>
+                    <th>Medidas</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="catalogTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel p-4" id="clientesView">
+            <div class="row g-4">
+              <div class="col-xl-5">
+                <div class="section-title mb-2">1. Cadastrar Cliente</div>
+                <form class="row g-3 mb-4" id="clientForm" enctype="multipart/form-data">
+                  <div class="col-12">
+                    <label class="form-label" for="clientName">Nome do cliente</label>
+                    <input class="form-control" id="clientName" name="nome" required placeholder="Ex: Grupo Baklizi">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Foto de Capa</label>
+                    <div id="pasteArea" class="paste-box p-4 text-center text-muted">
+                      <span id="pasteInstructions">Aperte <strong>Ctrl + V</strong> em qualquer lugar da tela para colar a foto.</span>
+                      <img id="clientPhotoPreview" src="" alt="Preview da Foto" class="img-fluid mt-3 rounded shadow-sm" style="max-height: 150px; display: none; margin: 0 auto;">
+                    </div>
+                    <input type="file" id="clientPhotoFile" name="foto_file" accept="image/*" hidden>
+                  </div>
+                  <div class="col-12 d-grid">
+                    <button class="btn btn-primary" type="submit">Salvar Cliente</button>
+                  </div>
+                  <div class="col-12" id="clientFormResult"></div>
+                </form>
+
+                <div class="section-title mb-2">2. Criar Tradebook</div>
+                <form class="row g-3" id="tradebookForm">
+                  <div class="col-12">
+                    <label class="form-label" for="tradebookClient">Selecione o Cliente</label>
+                    <select class="form-select" id="tradebookClient" name="cliente_id" required></select>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label" for="tradebookName">Nome do tradebook</label>
+                    <input class="form-control" id="tradebookName" name="nome" required placeholder="Ex: Tradebook Campanha de Páscoa 2026">
+                  </div>
+                  <div class="col-12 d-grid">
+                    <button class="btn btn-primary" type="submit">Criar e Selecionar Tradebook</button>
+                  </div>
+                  <div class="col-12" id="tradebookFormResult"></div>
+                </form>
+              </div>
+
+              <div class="col-xl-7">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                  <div>
+                    <div class="section-title">Tradebooks Ativos</div>
+                    <p class="section-description">Selecione um tradebook para iniciar o setup.</p>
+                  </div>
+                  <button class="btn btn-outline-secondary btn-sm" type="button" id="refreshTradebooksButton">Atualizar</button>
+                </div>
+                <div class="d-grid gap-2 mb-4" id="tradebookList"></div>
+
+                <div id="massStoresSection" hidden>
+                  <hr>
+                  <div class="d-flex justify-content-between align-items-center my-3">
+                    <div class="section-title">Gerenciar Lojas deste Tradebook</div>
+                    <button class="btn btn-outline-primary btn-sm" type="button" id="addBatchStoreRowBtn">+ Adicionar Linha</button>
+                  </div>
+                  <div class="table-wrap mb-3">
+                    <table class="table table-sm" id="batchStoresTable">
+                      <thead>
+                        <tr>
+                          <th>Nome da Loja</th>
+                          <th>Endereço</th>
+                          <th>Tipo</th>
+                          <th>Faturamento (R$)</th>
+                          <th>Região</th>
+                          <th>Ticket Médio</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody id="batchStoresBody">
+                        </tbody>
+                    </table>
+                  </div>
+                  <button class="btn btn-success w-100" type="button" id="saveBatchStoresBtn">Salvar Todas as Lojas</button>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          <section class="panel p-4" id="templateView" hidden>
+            <div class="d-flex flex-column flex-xl-row justify-content-between gap-3 mb-4">
+              <div>
+                <div class="section-title">Montagem do Template (Ativos Padrão)</div>
+                <p class="section-description">Selecione todos os ativos que as lojas físicas devem conter por padrão. Ajuste a quantidade inicial desejada.</p>
+              </div>
+              <button class="btn btn-success" type="button" id="saveTemplateBatchBtn">Salvar Itens do Template</button>
+            </div>
+            
+            <div class="table-wrap">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">Incluir</th>
+                    <th>Ativo</th>
+                    <th>Tipo</th>
+                    <th>Qtd. Padrão</th>
+                    <th>Custo</th>
+                    <th>Venda</th>
+                  </tr>
+                </thead>
+                <tbody id="templateBulkTableBody">
+                  </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel p-4" id="lojasView" hidden>
+            <div class="row g-4">
+              <div class="col-xl-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="section-title">Lojas do Cliente</div>
+                  <button class="btn btn-outline-secondary btn-sm" type="button" id="refreshStoresButton">🔄</button>
+                </div>
+                <div class="store-list" id="storeList"></div>
+              </div>
+
+              <div class="col-xl-9">
+                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                  <div>
+                    <div class="section-title" id="storeAssetsTitle">Inventário da Loja</div>
+                    <p class="section-description" id="storeAssetsDescription">Selecione uma loja na barra lateral esquerda para gerenciar seu inventário.</p>
+                  </div>
+                  <div class="d-flex flex-wrap gap-2 align-items-center" id="extraAssetSection" hidden>
+                    <span class="small text-muted fw-bold">Adicionar Ativo Extra:</span>
+                    <select class="form-select form-select-sm" id="storeAssetSelect" style="max-width: 200px;"></select>
+                    <input class="form-control form-control-sm compact-input" id="storeAssetQty" placeholder="Qtd." value="1">
+                    <button class="btn btn-primary btn-sm" type="button" id="addStoreAssetButton">Adicionar</button>
+                  </div>
+                </div>
+                <div id="storeAssetsContent"></div>
+              </div>
+            </div>
+          </section>
+
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const mediaTypes = {
+      fisico: { label: 'Fisico', color: '#0ea5e9' },
+      grafico: { label: 'Grafico', color: '#f59e0b' },
+      midias: { label: 'Midias', color: '#db2777' },
+      material_fornecedor: { label: 'Material fornecedor', color: '#16a34a' },
+      digital: { label: 'Digital', color: '#7c3aed' }
+    };
+
+    const state = {
+      catalog: [],
+      clients: [],
+      tradebooks: [],
+      selectedTradebookId: Number(localStorage.getItem('tb.selectedTradebookId') || 0),
+      template: [],
+      stores: [],
+      selectedStoreId: Number(localStorage.getItem('tb.selectedStoreId') || 0),
+      storeAssets: []
+    };
+
+    const $ = selector => document.querySelector(selector);
+    const guardMessage = $('#guardMessage');
+    const tradebookArea = $('#tradebookArea');
+    const userGreeting = $('#userGreeting');
+    const selectedTradebookBadge = $('#selectedTradebookBadge');
+    const globalResult = $('#globalResult');
+    const clientFormResult = $('#clientFormResult');
+    const tradebookFormResult = $('#tradebookFormResult');
+
+    function escapeHtml(value) {
+      return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    }
+
+    function money(value) {
+      return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function mediaBadge(type) {
+      const media = mediaTypes[type] || { label: type || 'Sem tipo', color: '#64748b' };
+      return `<span class="media-badge media-${escapeHtml(type)}"><span class="media-dot" style="background:${media.color}"></span>${escapeHtml(media.label)}</span>`;
+    }
+
+    function selectedTradebook() {
+      return state.tradebooks.find(item => Number(item.id) === state.selectedTradebookId) || null;
+    }
+
+    function selectedStore() {
+      return state.stores.find(item => Number(item.id) === state.selectedStoreId) || null;
+    }
+
+    function setNotice(message, type = 'success') {
+      globalResult.innerHTML = message ? `<div class="alert alert-${type} mb-0">${escapeHtml(message)}</div>` : '';
+    }
+
+    function setInlineNotice(target, message, type = 'success') {
+      if (!target) return;
+      target.innerHTML = message ? `<div class="alert alert-${type} mb-0">${escapeHtml(message)}</div>` : '';
+    }
+
+    function safeReset(form) {
+      if (form && typeof form.reset === 'function') form.reset();
+    }
+
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, options);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) {
+        throw new Error(data.message || 'Erro inesperado ao conectar com o servidor.');
+      }
+      return data;
+    }
+
+    function formDataWithAction(form, action) {
+      const formData = new FormData(form);
+      formData.set('action', action);
+      return formData;
+    }
+
+    function fillMediaSelect(select) {
+      select.innerHTML = Object.entries(mediaTypes)
+        .map(([value, item]) => `<option value="${value}">${item.label}</option>`)
+        .join('');
+    }
+
+    function fillAssetSelect(select, includeAll = true) {
+      const rows = includeAll ? state.catalog : state.catalog.filter(item => item.tipo_midia === 'digital');
+      select.innerHTML = rows.length
+        ? rows.map(item => `<option value="${item.id}">${escapeHtml(item.nome_ativo)}</option>`).join('')
+        : '<option value="">Cadastre ativos primeiro</option>';
+    }
+
+    function updateSelectedTradebookBadge() {
+      const tradebook = selectedTradebook();
+      selectedTradebookBadge.textContent = tradebook
+        ? `${tradebook.cliente_nome} - ${tradebook.nome}`
+        : 'Nenhum tradebook selecionado';
+
+      if (tradebook) {
+        $('#massStoresSection').hidden = false;
+      } else {
+        $('#massStoresSection').hidden = true;
+      }
+    }
+
+    // PASSO 1: Lojas Dinâmicas
+    function renderBatchStores() {
+      const body = $('#batchStoresBody');
+      body.innerHTML = '';
+      if (state.stores.length === 0) {
+        addBatchStoreRow();
+      } else {
+        state.stores.forEach(store => addBatchStoreRow(store));
+      }
+    }
+
+    function addBatchStoreRow(storeData = null) {
+      const body = $('#batchStoresBody');
+      const tr = document.createElement('tr');
+      tr.dataset.storeId = storeData ? storeData.id : '';
+      tr.innerHTML = `
+        <td><input class="form-control form-control-sm store-name" value="${storeData ? escapeHtml(storeData.nome) : ''}" required></td>
+        <td><input class="form-control form-control-sm store-address" value="${storeData ? escapeHtml(storeData.endereco || '') : ''}"></td>
+        <td>
+          <select class="form-select form-select-sm store-type">
+            <option value="fisica" ${storeData && storeData.tipo === 'fisica' ? 'selected' : ''}>Física</option>
+            <option value="digital" ${storeData && storeData.tipo === 'digital' ? 'selected' : ''}>Digital</option>
+          </select>
+        </td>
+        <td><input class="form-control form-control-sm store-fat" type="number" step="0.01" value="${storeData ? storeData.faturamento || '' : ''}"></td>
+        <td><input class="form-control form-control-sm store-region" value="${storeData ? escapeHtml(storeData.regiao || '') : ''}"></td>
+        <td><input class="form-control form-control-sm store-ticket" type="number" step="0.01" value="${storeData ? storeData.ticket_medio || '' : ''}"></td>
+        <td><button class="btn btn-outline-danger btn-sm remove-row-btn" type="button">&times;</button></td>
+      `;
+      body.appendChild(tr);
+
+      tr.querySelector('.remove-row-btn').addEventListener('click', async () => {
+        if (storeData && storeData.id) {
+          if (confirm('Deletar permanentemente esta loja?')) {
+            const fd = new FormData();
+            fd.set('action', 'delete');
+            fd.set('id', storeData.id);
+            await requestJson('backend/api/tb_lojas.php', { method: 'POST', body: fd });
+            await loadStores();
+          }
+        } else {
+          tr.remove();
+        }
+      });
+    }
+
+    // PASSO 2: Template Bulk
+    function renderTemplateBulk() {
+      const tbody = $('#templateBulkTableBody');
+      tbody.innerHTML = state.catalog.map(asset => {
+        const templateItem = state.template.find(t => Number(t.ativo_id) === Number(asset.id));
+        const checked = templateItem ? 'checked' : '';
+        const qty = templateItem ? templateItem.quantidade_padrao : '1';
+        return `
+          <tr data-asset-id="${asset.id}" data-template-item-id="${templateItem ? templateItem.id : ''}">
+            <td><input class="form-check-input template-checkbox" type="checkbox" ${checked}></td>
+            <td><strong>${escapeHtml(asset.nome_ativo)}</strong><div class="small text-muted">${escapeHtml(asset.medidas || '')}</div></td>
+            <td>${mediaBadge(asset.tipo_midia)}</td>
+            <td><input class="form-control form-control-sm compact-input template-qty" type="number" value="${qty}" ${checked ? '' : 'disabled'}></td>
+            <td>${money(asset.valor_custo)}</td>
+            <td>${money(asset.valor_venda)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.querySelectorAll('.template-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          e.target.closest('tr').querySelector('.template-qty').disabled = !e.target.checked;
+        });
+      });
+    }
+
+    async function loadCatalog() {
+      const result = await requestJson('backend/api/tb_catalogo.php?action=list');
+      state.catalog = result.ativos || [];
+      renderCatalog();
+      fillAssetSelect($('#storeAssetSelect'));
+    }
+
+    function renderCatalog() {
+      $('#catalogTable').innerHTML = state.catalog.length ? state.catalog.map(item => `
+        <tr>
+          <td><strong>${escapeHtml(item.nome_ativo)}</strong></td>
+          <td>${mediaBadge(item.tipo_midia)}</td>
+          <td>${money(item.valor_custo)}</td>
+          <td>${money(item.valor_venda)}</td>
+          <td>${escapeHtml(item.medidas || '-')}</td>
+          <td>
+            <div class="d-flex flex-wrap gap-1">
+              <button class="btn btn-outline-secondary btn-sm" type="button" data-edit-catalog="${item.id}">Editar</button>
+              <button class="btn btn-outline-danger btn-sm" type="button" data-delete-catalog="${item.id}">Remover</button>
+            </div>
+          </td>
+        </tr>
+      `).join('') : '<tr><td colspan="6" class="text-center text-muted py-4">Nenhum ativo.</td></tr>';
+    }
+
+    function resetCatalogForm() {
+      safeReset($('#catalogForm'));
+      $('#catalogId').value = '';
+      $('#catalogCost').value = 0;
+      $('#catalogSale').value = 0;
+      $('#catalogSubmitButton').textContent = 'Cadastrar ativo';
+      $('#cancelCatalogEditButton').hidden = true;
+    }
+
+    async function loadClientsAndTradebooks() {
+      const [clients, tradebooks] = await Promise.all([
+        requestJson('backend/api/tb_clientes.php?action=list_clientes'),
+        requestJson('backend/api/tb_clientes.php?action=list_tradebooks')
+      ]);
+      state.clients = clients.clientes || [];
+      state.tradebooks = tradebooks.tradebooks || [];
+      renderClientSelect();
+      renderTradebooks();
+      updateSelectedTradebookBadge();
+    }
+
+    function renderClientSelect() {
+      $('#tradebookClient').innerHTML = state.clients.length
+        ? state.clients.map(client => `<option value="${client.id}">${escapeHtml(client.nome)}</option>`).join('')
+        : '<option value="">Cadastre um cliente primeiro</option>';
+    }
+
+    function renderTradebooks() {
+      renderCurrentTradebookSelect();
+      $('#tradebookList').innerHTML = state.tradebooks.length ? state.tradebooks.map(item => {
+        const publicUrl = `${location.origin}${location.pathname.replace(/tradebook\.html$/, 'tradebook_public.html')}?token=${item.public_token}`;
+        return `
+          <article class="tradebook-card ${Number(item.id) === state.selectedTradebookId ? 'active' : ''}" data-select-tradebook="${item.id}">
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+              <div>
+                <strong>${escapeHtml(item.nome)}</strong>
+                <div class="text-muted small">${escapeHtml(item.cliente_nome)}</div>
+              </div>
+              <a class="btn btn-outline-secondary btn-sm" href="${publicUrl}" target="_blank" rel="noopener">Apresentação ↗</a>
+            </div>
+          </article>
+        `;
+      }).join('') : '<div class="empty-state">Nenhum tradebook.</div>';
+    }
+
+    function renderCurrentTradebookSelect() {
+      const select = $('#currentTradebookSelect');
+      if (!select) return;
+      select.innerHTML = state.tradebooks.length
+        ? '<option value="">Selecione um tradebook</option>' + state.tradebooks.map(item => `
+          <option value="${item.id}" ${Number(item.id) === state.selectedTradebookId ? 'selected' : ''}>
+            ${escapeHtml(item.cliente_nome)} - ${escapeHtml(item.nome)}
+          </option>
+        `).join('')
+        : '<option value="">Nenhum tradebook</option>';
+    }
+
+    async function selectTradebook(id) {
+      state.selectedTradebookId = Number(id);
+      localStorage.setItem('tb.selectedTradebookId', String(state.selectedTradebookId));
+      state.selectedStoreId = 0;
+      localStorage.removeItem('tb.selectedStoreId');
+      renderTradebooks();
+      renderCurrentTradebookSelect();
+      updateSelectedTradebookBadge();
+      await Promise.all([loadTemplate(), loadStores()]);
+    }
+
+    function requireTradebook() {
+      if (!state.selectedTradebookId) {
+        setView('clientes');
+        throw new Error('Crie ou selecione um Tradebook primeiro.');
+      }
+    }
+
+    async function loadTemplate() {
+      if (!state.selectedTradebookId) {
+        state.template = [];
+        renderTemplateBulk();
+        return;
+      }
+      const result = await requestJson(`backend/api/tb_template.php?action=list&tradebook_id=${state.selectedTradebookId}`);
+      state.template = result.itens || [];
+      renderTemplateBulk();
+    }
+
+    async function loadStores() {
+      if (!state.selectedTradebookId) {
+        state.stores = [];
+        state.storeAssets = [];
+        renderStores();
+        renderStoreAssets();
+        return;
+      }
+      const result = await requestJson(`backend/api/tb_lojas.php?action=list&tradebook_id=${state.selectedTradebookId}`);
+      state.stores = result.lojas || [];
+      if (!state.stores.some(item => Number(item.id) === state.selectedStoreId)) {
+        state.selectedStoreId = Number(state.stores[0]?.id || 0);
+      }
+      if (state.selectedStoreId) {
+        localStorage.setItem('tb.selectedStoreId', String(state.selectedStoreId));
+      }
+      renderStores();
+      renderBatchStores(); // Atualiza a tabela massiva do passo 1
+      await loadStoreAssets();
+    }
+
+    function renderStores() {
+      $('#storeList').innerHTML = state.stores.length ? state.stores.map(store => `
+        <button class="store-button ${Number(store.id) === state.selectedStoreId ? 'active' : ''}" type="button" data-select-store="${store.id}">
+          <strong>${escapeHtml(store.nome)}</strong>
+          <div class="small text-muted">${store.tipo === 'digital' ? '💻 Loja digital' : '🏪 Loja fisica'}</div>
+        </button>
+      `).join('') : '<div class="empty-state">Sem lojas. Crie-as no Passo 1.</div>';
+    }
+
+    async function selectStore(id) {
+      state.selectedStoreId = Number(id);
+      localStorage.setItem('tb.selectedStoreId', String(state.selectedStoreId));
+      renderStores();
+      await loadStoreAssets();
+    }
+
+    async function loadStoreAssets() {
+      if (!state.selectedStoreId) {
+        state.storeAssets = [];
+        renderStoreAssets();
+        return;
+      }
+      const result = await requestJson(`backend/api/tb_lojas.php?action=list_ativos&loja_id=${state.selectedStoreId}`);
+      state.storeAssets = result.itens || [];
+      renderStoreAssets();
+    }
+
+    function renderStoreAssets() {
+      const store = selectedStore();
+      $('#storeAssetsTitle').textContent = store ? `Ativos de: ${store.nome}` : 'Inventário Final';
+      
+      const extraSection = $('#extraAssetSection');
+      if (store) extraSection.hidden = false;
+      else extraSection.hidden = true;
+
+      const content = $('#storeAssetsContent');
+      if (!store) {
+        content.innerHTML = '<div class="empty-state">Selecione uma loja para ver os ativos dela.</div>';
+        return;
+      }
+      content.innerHTML = state.storeAssets.length ? `
+        <div class="table-wrap">
+          <table class="table table-sm align-middle">
+            <thead><tr><th>Ativo</th><th>Tipo</th><th>Qtd. Real</th><th>Disponivel para Trade</th><th>Venda</th><th>Ações</th></tr></thead>
+            <tbody>
+              ${state.storeAssets.map(item => `
+                <tr>
+                  <td><strong>${escapeHtml(item.nome_ativo)}</strong><div class="small text-muted">${escapeHtml(item.medidas || '')}</div></td>
+                  <td>${mediaBadge(item.tipo_midia)}</td>
+                  <td><input class="form-control form-control-sm compact-input" value="${escapeHtml(item.quantidade)}" data-store-qty="${item.id}"></td>
+                  <td><input class="form-check-input" type="checkbox" ${Number(item.disponivel_para_trade) ? 'checked' : ''} data-store-available="${item.id}"></td>
+                  <td>${money(item.valor_venda)}</td>
+                  <td>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" data-save-store-asset="${item.id}">Salvar</button>
+                    <button class="btn btn-outline-danger btn-sm" type="button" data-remove-store-asset="${item.id}">Remover</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : '<div class="empty-state">Nenhum ativo associado a esta loja.</div>';
+    }
+
+    function setView(view) {
+      ['catalogo', 'clientes', 'template', 'lojas'].forEach(name => {
+        $(`#${name}View`).hidden = name !== view;
+      });
+      document.querySelectorAll('#mainTabs .nav-link').forEach(button => {
+        button.classList.toggle('active', button.dataset.view === view);
+      });
+      document.querySelectorAll('.roadmap-step').forEach(step => {
+        step.classList.toggle('active', step.dataset.stepTarget === view);
+      });
+    }
+
+    async function boot() {
+      fillMediaSelect($('#catalogType'));
+      try {
+        const result = await requestJson('backend/api/auth.php?action=status');
+        const nivel = result.user?.nivel || '';
+        if (!result.authenticated || (result.role !== 'admin' && nivel !== 'tradebook')) {
+          window.location.href = 'index.html';
+          return;
+        }
+        guardMessage.hidden = true;
+        tradebookArea.hidden = false;
+        userGreeting.textContent = result.role === 'admin' ? 'Admin' : `Olá, ${result.user.nome}`;
+        
+        await Promise.all([loadCatalog(), loadClientsAndTradebooks()]);
+        await Promise.all([loadTemplate(), loadStores()]);
+      } catch (error) {
+        window.location.href = 'index.html';
+      }
+    }
+
+    $('#logoutButton').addEventListener('click', async () => {
+      await requestJson('backend/api/auth.php?action=logout', { method: 'POST' });
+      window.location.href = 'index.html';
+    });
+
+    $('#mainTabs').addEventListener('click', event => {
+      const button = event.target.closest('[data-view]');
+      if (button) setView(button.dataset.view);
+    });
+
+    document.querySelectorAll('.roadmap-step').forEach(step => {
+      step.addEventListener('click', () => setView(step.dataset.stepTarget));
+    });
+
+    $('#refreshCatalogButton').addEventListener('click', () => loadCatalog().catch(e => setNotice(e.message, 'danger')));
+    $('#refreshTradebooksButton').addEventListener('click', () => loadClientsAndTradebooks().catch(e => setNotice(e.message, 'danger')));
+    $('#refreshStoresButton').addEventListener('click', () => loadStores().catch(e => setNotice(e.message, 'danger')));
+
+    $('#catalogForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      try {
+        const id = $('#catalogId').value;
+        await requestJson('backend/api/tb_catalogo.php', { method: 'POST', body: formDataWithAction(event.currentTarget, id ? 'update' : 'create') });
+        resetCatalogForm();
+        await loadCatalog();
+        setNotice(id ? 'Ativo atualizado.' : 'Ativo cadastrado.');
+      } catch (error) {
+        setNotice(error.message, 'danger');
+      }
+    });
+
+    $('#cancelCatalogEditButton').addEventListener('click', resetCatalogForm);
+
+    $('#catalogTable').addEventListener('click', async event => {
+      const edit = event.target.closest('[data-edit-catalog]');
+      const remove = event.target.closest('[data-delete-catalog]');
+      try {
+        if (edit) {
+          const item = state.catalog.find(row => Number(row.id) === Number(edit.dataset.editCatalog));
+          $('#catalogId').value = item.id;
+          $('#catalogName').value = item.nome_ativo;
+          $('#catalogType').value = item.tipo_midia;
+          $('#catalogCost').value = item.valor_custo || 0;
+          $('#catalogSale').value = item.valor_venda || 0;
+          $('#catalogMeasures').value = item.medidas || '';
+          $('#catalogSubmitButton').textContent = 'Salvar ativo';
+          $('#cancelCatalogEditButton').hidden = false;
+        }
+        if (remove && confirm('Remover este ativo do catalogo?')) {
+          const fd = new FormData(); fd.set('action', 'delete'); fd.set('id', remove.dataset.deleteCatalog);
+          await requestJson('backend/api/tb_catalogo.php', { method: 'POST', body: fd });
+          await loadCatalog();
+          setNotice('Ativo removido.');
+        }
+      } catch (error) { setNotice(error.message, 'danger'); }
+    });
+
+    $('#clientForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      setInlineNotice(clientFormResult, 'Cadastrando cliente...', 'info');
+      try {
+        const formData = new FormData(event.currentTarget);
+        formData.set('action', 'create_cliente');
+        const result = await requestJson('backend/api/tb_clientes.php', { method: 'POST', body: formData });
+
+        $('#clientPhotoFile').value = '';
+        $('#clientPhotoPreview').style.display = 'none';
+        $('#pasteArea').classList.remove('has-image');
+        $('#pasteInstructions').innerHTML = "Aperte <strong>Ctrl + V</strong> em qualquer lugar da tela para colar a foto.";
+
+        safeReset(event.currentTarget);
+        await loadClientsAndTradebooks();
+        if (result.id) $('#tradebookClient').value = String(result.id);
+        setInlineNotice(clientFormResult, 'Cliente cadastrado com sucesso! Prossiga para criar o Tradebook.', 'success');
+      } catch (error) {
+        setInlineNotice(clientFormResult, error.message, 'danger');
+      }
+    });
+
+    $('#tradebookForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      setInlineNotice(tradebookFormResult, 'Criando tradebook...', 'info');
+      try {
+        const result = await requestJson('backend/api/tb_clientes.php', { method: 'POST', body: formDataWithAction(event.currentTarget, 'create_tradebook') });
+        safeReset(event.currentTarget);
+        await loadClientsAndTradebooks();
+        await selectTradebook(result.id);
+        setInlineNotice(tradebookFormResult, 'Tradebook criado e selecionado!', 'success');
+      } catch (error) {
+        setInlineNotice(tradebookFormResult, error.message, 'danger');
+      }
+    });
+
+    $('#addBatchStoreRowBtn').addEventListener('click', () => addBatchStoreRow());
+
+    $('#saveBatchStoresBtn').addEventListener('click', async () => {
+      try {
+        requireTradebook();
+        setNotice('Salvando lojas...', 'info');
+        const promises = [];
+        document.querySelectorAll('#batchStoresBody tr').forEach(row => {
+          const storeId = row.dataset.storeId;
+          const nome = row.querySelector('.store-name').value.trim();
+          if (!nome) return;
+          const fd = new FormData();
+          fd.set('tradebook_id', state.selectedTradebookId);
+          fd.set('nome', nome);
+          fd.set('endereco', row.querySelector('.store-address').value.trim());
+          fd.set('tipo', row.querySelector('.store-type').value);
+          fd.set('faturamento', row.querySelector('.store-fat').value);
+          fd.set('regiao', row.querySelector('.store-region').value.trim());
+          fd.set('ticket_medio', row.querySelector('.store-ticket').value);
+
+          if (storeId) {
+            fd.set('action', 'update');
+            fd.set('id', storeId);
+          } else {
+            fd.set('action', 'create');
+            promises.push(requestJson('backend/api/tb_lojas.php', { method: 'POST', body: fd }));
+          }
+        });
+        await Promise.all(promises);
+        await loadStores();
+        setNotice('Lojas salvas com sucesso! Avance para o Template.', 'success');
+      } catch (error) { setNotice(error.message, 'danger'); }
+    });
+
+    $('#saveTemplateBatchBtn').addEventListener('click', async () => {
+      try {
+        requireTradebook();
+        setNotice('Sincronizando template...', 'info');
+        const promises = [];
+        document.querySelectorAll('#templateBulkTableBody tr').forEach(row => {
+          const isChecked = row.querySelector('.template-checkbox').checked;
+          const tid = row.dataset.templateItemId;
+          const fd = new FormData();
+          if (isChecked) {
+            fd.set('quantidade_padrao', row.querySelector('.template-qty').value);
+            if (tid) { fd.set('action', 'update_item'); fd.set('id', tid); }
+            else { fd.set('action', 'add_item'); fd.set('tradebook_id', state.selectedTradebookId); fd.set('ativo_id', row.dataset.assetId); }
+            promises.push(requestJson('backend/api/tb_template.php', { method: 'POST', body: fd }));
+          } else if (tid) {
+            fd.set('action', 'remove_item'); fd.set('id', tid);
+            promises.push(requestJson('backend/api/tb_template.php', { method: 'POST', body: fd }));
+          }
+        });
+        await Promise.all(promises);
+        await loadTemplate();
+        setNotice('Template salvo! Avance para o Inventário Final.', 'success');
+      } catch (error) { setNotice(error.message, 'danger'); }
+    });
+
+    $('#currentTradebookSelect').addEventListener('change', event => {
+      const id = Number(event.target.value || 0);
+      if (!id) {
+        state.selectedTradebookId = 0; localStorage.removeItem('tb.selectedTradebookId');
+        updateSelectedTradebookBadge(); renderTradebooks(); loadTemplate(); loadStores(); return;
+      }
+      selectTradebook(id).catch(e => setNotice(e.message, 'danger'));
+    });
+
+    $('#tradebookList').addEventListener('click', e => {
+      if (e.target.closest('a')) return;
+      const card = e.target.closest('[data-select-tradebook]');
+      if (card) selectTradebook(card.dataset.selectTradebook).catch(err => setNotice(err.message, 'danger'));
+    });
+
+    $('#storeList').addEventListener('click', e => {
+      const btn = e.target.closest('[data-select-store]');
+      if (btn) selectStore(btn.dataset.selectStore).catch(err => setNotice(err.message, 'danger'));
+    });
+
+    $('#addStoreAssetButton').addEventListener('click', async () => {
+      try {
+        if (!state.selectedStoreId) throw new Error('Selecione uma loja.');
+        const fd = new FormData();
+        fd.set('action', 'add_ativo'); fd.set('loja_id', state.selectedStoreId);
+        fd.set('ativo_id', $('#storeAssetSelect').value); fd.set('quantidade', $('#storeAssetQty').value); fd.set('disponivel_para_trade', 1);
+        await requestJson('backend/api/tb_lojas.php', { method: 'POST', body: fd });
+        await loadStoreAssets(); setNotice('Ativo extra adicionado.');
+      } catch (error) { setNotice(error.message, 'danger'); }
+    });
+
+    $('#storeAssetsContent').addEventListener('click', async e => {
+      const save = e.target.closest('[data-save-store-asset]');
+      const remove = e.target.closest('[data-remove-store-asset]');
+      try {
+        const fd = new FormData();
+        if (save) {
+          fd.set('action', 'update_ativo'); fd.set('id', save.dataset.saveStoreAsset);
+          fd.set('quantidade', document.querySelector(`[data-store-qty="${save.dataset.saveStoreAsset}"]`).value);
+          fd.set('disponivel_para_trade', document.querySelector(`[data-store-available="${save.dataset.saveStoreAsset}"]`).checked ? 1 : 0);
+          await requestJson('backend/api/tb_lojas.php', { method: 'POST', body: fd });
+          setNotice('Ativo atualizado.');
+        }
+        if (remove) {
+          fd.set('action', 'remove_ativo'); fd.set('id', remove.dataset.removeStoreAsset);
+          await requestJson('backend/api/tb_lojas.php', { method: 'POST', body: fd });
+          await loadStoreAssets(); setNotice('Ativo removido.');
+        }
+      } catch (error) { setNotice(error.message, 'danger'); }
+    });
+
+    boot();
+
+    // Evento GLOBAL de Ctrl+V (Funciona independentemente de onde você clicar)
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          
+          const clientPhotoFile = document.getElementById('clientPhotoFile');
+          const clientPhotoPreview = document.getElementById('clientPhotoPreview');
+          const pasteInstructions = document.getElementById('pasteInstructions');
+          const pasteArea = document.getElementById('pasteArea');
+          
+          if (clientPhotoFile && clientPhotoPreview) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            clientPhotoFile.files = dataTransfer.files;
+
+            const url = URL.createObjectURL(file);
+            clientPhotoPreview.src = url;
+            clientPhotoPreview.style.display = 'block';
+            
+            if (pasteArea) pasteArea.classList.add('has-image');
+            if (pasteInstructions) {
+              pasteInstructions.innerHTML = "<span class='text-success'><strong>Foto capturada!</strong></span> (Aperte Ctrl+V novamente para substituir)";
+            }
+            
+            e.preventDefault();
+            break;
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
