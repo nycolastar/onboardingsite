@@ -397,6 +397,61 @@ function ensureExtraSectionTables(PDO $pdo): void
             CONSTRAINT fk_diagnostico_loja_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_acesso(id) ON DELETE SET NULL
         )'
     );
+    $diagnosticColumns = [
+        'dados_loja_id' => 'INT NULL',
+        'preenchido_por' => 'VARCHAR(255) NULL',
+        'loja_nome_numero' => 'VARCHAR(255) NULL',
+        'endereco_loja' => 'VARCHAR(500) NULL',
+        'banner_estacionamento' => 'VARCHAR(20) NULL',
+        'banner_estacionamento_quantidade' => 'VARCHAR(80) NULL',
+        'banners_gradil_estacionamento' => 'VARCHAR(20) NULL',
+        'banners_gradil_estacionamento_qtd' => 'VARCHAR(80) NULL',
+        'antena_alarme_entrada' => 'VARCHAR(20) NULL',
+        'antena_alarme_entrada_qtd' => 'VARCHAR(80) NULL',
+        'placas_cancela_estacionamento' => 'VARCHAR(20) NULL',
+        'placas_cancela_estacionamento_qtd' => 'VARCHAR(80) NULL',
+        'quantidade_checkouts' => 'VARCHAR(80) NULL',
+        'reguas_check_stand' => 'VARCHAR(20) NULL',
+        'reguas_check_stand_qtd' => 'VARCHAR(80) NULL',
+        'quantidade_pontas_gondola' => 'VARCHAR(80) NULL',
+        'quantidade_portas_pontas_refrigeradas' => 'VARCHAR(80) NULL',
+        'quantidade_orelhas_ponta_gondola' => 'VARCHAR(80) NULL',
+        'ilhas_loja' => 'VARCHAR(20) NULL',
+        'ilhas_loja_qtd' => 'VARCHAR(80) NULL',
+        'localizacao_principais_ilhas' => 'TEXT NULL',
+        'quantidade_display_chao' => 'VARCHAR(80) NULL',
+        'backlights' => 'VARCHAR(20) NULL',
+        'backlights_qtd' => 'VARCHAR(80) NULL',
+        'exclusividade_ponta_backlight' => 'VARCHAR(20) NULL',
+        'banners_interior' => 'VARCHAR(20) NULL',
+        'banners_interior_detalhes' => 'TEXT NULL',
+        'retail_media' => 'VARCHAR(20) NULL',
+        'retail_media_ativos' => 'TEXT NULL',
+        'televisores_internos' => 'VARCHAR(20) NULL',
+        'televisores_internos_qtd' => 'VARCHAR(80) NULL',
+        'elevadores' => 'VARCHAR(20) NULL',
+        'elevadores_qtd' => 'VARCHAR(80) NULL',
+        'radio_interna' => 'VARCHAR(20) NULL',
+        'escadas_esteiras_rolantes' => 'VARCHAR(20) NULL',
+        'escadas_esteiras_rolantes_qtd' => 'TEXT NULL',
+        'quantidade_freezers' => 'VARCHAR(80) NULL',
+        'quantidade_pontas_ilha_congelados' => 'VARCHAR(80) NULL',
+        'displays_laterais_lfc' => 'VARCHAR(20) NULL',
+        'displays_laterais_lfc_qtd' => 'VARCHAR(80) NULL',
+        'walk_in_cooler' => 'VARCHAR(20) NULL',
+        'walk_in_cooler_portas' => 'VARCHAR(80) NULL',
+        'quantidade_portas_bebidas' => 'VARCHAR(80) NULL',
+        'quantidade_portas_laticinios' => 'VARCHAR(80) NULL',
+        'quantidade_portas_congelados_refrigerados' => 'VARCHAR(80) NULL',
+        'quantidade_carrinhos' => 'VARCHAR(80) NULL',
+        'quantidade_cestas' => 'VARCHAR(80) NULL',
+        'quantidade_check_stands' => 'VARCHAR(80) NULL',
+        'pontas_gondola_refrigeradas_detalhes' => 'TEXT NULL',
+    ];
+
+    foreach ($diagnosticColumns as $column => $definition) {
+        ensureColumn($pdo, 'diagnostico_loja', $column, $definition);
+    }
 
     $pdo->exec(
         "CREATE TABLE IF NOT EXISTS fornecedores_import_lotes (

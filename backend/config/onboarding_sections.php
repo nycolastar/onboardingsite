@@ -31,7 +31,7 @@ $onboardingSections = [
     ],
     'diagnostico_loja' => [
         'label' => 'Diagnostico de loja',
-        'columns' => ['pasta_fotos', 'link_fotos', 'observacoes'],
+        'columns' => ['pasta_fotos', 'link_fotos', 'dados_loja_id', 'preenchido_por', 'loja_nome_numero', 'endereco_loja', 'banner_estacionamento', 'banner_estacionamento_quantidade', 'banners_gradil_estacionamento', 'banners_gradil_estacionamento_qtd', 'antena_alarme_entrada', 'antena_alarme_entrada_qtd', 'placas_cancela_estacionamento', 'placas_cancela_estacionamento_qtd', 'quantidade_checkouts', 'reguas_check_stand', 'reguas_check_stand_qtd', 'quantidade_pontas_gondola', 'quantidade_portas_pontas_refrigeradas', 'quantidade_orelhas_ponta_gondola', 'ilhas_loja', 'ilhas_loja_qtd', 'localizacao_principais_ilhas', 'quantidade_display_chao', 'backlights', 'backlights_qtd', 'exclusividade_ponta_backlight', 'banners_interior', 'banners_interior_detalhes', 'retail_media', 'retail_media_ativos', 'televisores_internos', 'televisores_internos_qtd', 'elevadores', 'elevadores_qtd', 'radio_interna', 'escadas_esteiras_rolantes', 'escadas_esteiras_rolantes_qtd', 'quantidade_freezers', 'quantidade_pontas_ilha_congelados', 'displays_laterais_lfc', 'displays_laterais_lfc_qtd', 'walk_in_cooler', 'walk_in_cooler_portas', 'quantidade_portas_bebidas', 'quantidade_portas_laticinios', 'quantidade_portas_congelados_refrigerados', 'quantidade_carrinhos', 'quantidade_cestas', 'quantidade_check_stands', 'pontas_gondola_refrigeradas_detalhes', 'observacoes'],
     ],
     'ativos_fisicos' => [
         'label' => 'Ativos Fisicos',

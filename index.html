@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -370,6 +370,31 @@
       margin-bottom: 0;
     }
 
+    .diagnostic-question {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .diagnostic-question .form-text {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .conditional-field {
+      border-left: 4px solid var(--yellow);
+      margin-top: .85rem;
+      padding-left: .85rem;
+    }
+
+    .draft-status {
+      color: var(--muted);
+      font-size: .86rem;
+      font-weight: 700;
+      margin-right: auto;
+    }
+
     .help-dialog {
       border: 0;
       border-radius: 8px;
@@ -582,6 +607,26 @@
 
     [hidden] {
       display: none !important;
+    }
+
+    @media (max-width: 575.98px) {
+      .panel {
+        border-radius: 12px;
+      }
+
+      .diagnostic-question {
+        padding: .85rem;
+      }
+
+      .form-control,
+      .form-select,
+      .btn {
+        min-height: 48px;
+      }
+
+      .draft-status {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -861,6 +906,44 @@
   </dialog>
 
   <script>
+    const diagnosticFields = [
+      { name: 'dados_loja_id', label: 'Selecionar loja cadastrada', type: 'store-select', help: 'Ao selecionar, o nome e o endereco da loja serao preenchidos automaticamente.', full: true },
+      { name: 'preenchido_por', label: 'Quem está preenchendo', required: true, full: true },
+      { name: 'loja_nome_numero', label: 'Nome e número da loja', help: 'Ex: Loja 01 - Campinas, Loja 02 - Santo André, etc.', required: true, full: true },
+      { name: 'endereco_loja', label: 'Endereço da loja', required: true, full: true },
+      { name: 'banner_estacionamento', label: 'É possível a inserção no banner de estacionamento?', required: true, type: 'yes-no', conditional: { name: 'banner_estacionamento_quantidade', label: 'Até quantos banners?', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'banners_gradil_estacionamento', label: 'É possível instalar banners no gradil do estacionamento?', help: 'Caso exista gradil no estacionamento.', required: true, type: 'yes-no', conditional: { name: 'banners_gradil_estacionamento_qtd', label: 'Quantidade máxima de banners no gradil', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'antena_alarme_entrada', label: 'A loja possui antena de alarme na entrada?', required: true, type: 'yes-no', conditional: { name: 'antena_alarme_entrada_qtd', label: 'Quantidade de antenas existentes', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'placas_cancela_estacionamento', label: 'A loja possui placas de cancela no estacionamento?', required: true, type: 'yes-no', conditional: { name: 'placas_cancela_estacionamento_qtd', label: 'Quantidade de placas existentes', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'quantidade_checkouts', label: 'Quantidade de checkouts da loja', help: 'Informe o número total de checkouts (caixas) em operação na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'reguas_check_stand', label: 'A loja possui réguas de check stand?', required: true, type: 'yes-no', conditional: { name: 'reguas_check_stand_qtd', label: 'Quantidade de réguas de um stand', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'quantidade_pontas_gondola', label: 'Quantidade de pontas de gôndola na loja', help: 'Informe o número total de pontas de gôndola existentes na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'quantidade_portas_pontas_refrigeradas', label: 'Quantidade de portas de pontas refrigeradas', help: 'Informe o número total de portas refrigeradas e de pontas de gôndola refrigeradas existentes na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'quantidade_orelhas_ponta_gondola', label: 'Quantidade de orelhas de ponta de gôndola na loja', help: 'Informe o número total de orelhas de ponta de gôndola existentes na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'ilhas_loja', label: 'É possível instalar ilhas na loja?', required: true, type: 'yes-no', conditional: { name: 'ilhas_loja_qtd', label: 'Quantidade máxima de pontos extras permitida', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'localizacao_principais_ilhas', label: 'Localização das 2 principais ilhas da loja', help: 'Informe onde estão localizadas as duas ilhas com maior fluxo de clientes. Exemplo: Entrada principal e corredor central.', required: true, type: 'textarea', full: true },
+      { name: 'quantidade_display_chao', label: 'Quantidade de display de chão na loja', help: 'Informe o número total de locais disponíveis para instalação de displays de chão.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'backlights', label: 'A loja possui backlights?', required: true, type: 'yes-no', conditional: { name: 'backlights_qtd', label: 'Quantidade de backlights existentes', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'exclusividade_ponta_backlight', label: 'A loja tem exclusividade de ponta de gôndola com backlight?', required: true, type: 'yes-no', full: true },
+      { name: 'banners_interior', label: 'É possível instalar banners no interior da loja?', required: true, type: 'yes-no', conditional: { name: 'banners_interior_detalhes', label: 'Quantidade máxima e formatos permitidos', type: 'textarea' }, full: true },
+      { name: 'retail_media', label: 'A loja possui alguma ativação de retail media?', help: 'Exemplo: Painel de LED, totem de LED, tela digital, videowall, entre outros.', required: true, type: 'yes-no', conditional: { name: 'retail_media_ativos', label: 'Quais ativos de retail media?', type: 'textarea' }, full: true },
+      { name: 'televisores_internos', label: 'A loja possui televisores internos?', required: true, type: 'yes-no', conditional: { name: 'televisores_internos_qtd', label: 'Quantidade total de televisores disponíveis', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'elevadores', label: 'A loja possui elevadores?', required: true, type: 'yes-no', conditional: { name: 'elevadores_qtd', label: 'Quantidade de elevadores existentes', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'radio_interna', label: 'Possui rádio interna?', required: true, type: 'yes-no', full: true },
+      { name: 'escadas_esteiras_rolantes', label: 'A loja possui escadas rolantes e/ou esteiras rolantes?', required: true, type: 'yes-no', conditional: { name: 'escadas_esteiras_rolantes_qtd', label: 'Quantidade de cada equipamento existente', type: 'textarea' }, full: true },
+      { name: 'quantidade_freezers', label: 'Quantidade de freezers na loja', help: 'Informe o número total de freezers existentes na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'quantidade_pontas_ilha_congelados', label: 'Quantidade de pontas de ilha de congelados na loja', help: 'Informe o número total de pontas de ilha de congelados.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'displays_laterais_lfc', label: 'A loja possui displays laterais (LFC)?', required: true, type: 'yes-no', conditional: { name: 'displays_laterais_lfc_qtd', label: 'Quantidade de displays laterais (LFC) existentes', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'walk_in_cooler', label: 'A loja possui Walk-In Cooler?', required: true, type: 'yes-no', conditional: { name: 'walk_in_cooler_portas', label: 'Quantidade de portas do Walk-In Cooler', type: 'number', inputmode: 'numeric' }, full: true },
+      { name: 'quantidade_portas_bebidas', label: 'Quantidade de portas de geladeiras de bebidas', help: 'Informe o número total de portas de geladeiras destinadas à exposição de bebidas na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'quantidade_portas_laticinios', label: 'Quantidade de portas de geladeiras de laticínios', help: 'Informe o número total de portas de geladeiras destinadas à exposição de produtos lácteos na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'quantidade_portas_congelados_refrigerados', label: 'Quantidade de portas de geladeiras de congelados e refrigerados', help: 'Informe o número total de portas de geladeiras destinadas à exposição de produtos congelados e refrigerados.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'quantidade_carrinhos', label: 'Quantidade de carrinhos de compras', help: 'Informe o número total de carrinhos de compras disponíveis na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'quantidade_cestas', label: 'Quantidade de cestas de compras', help: 'Informe o número total de cestas de compras disponíveis na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'quantidade_check_stands', label: 'Quantidade de check stands na loja', help: 'Informe o número total de check stands existentes na loja.', required: true, type: 'number', inputmode: 'numeric' },
+      { name: 'pontas_gondola_refrigeradas_detalhes', label: 'Quantidade de pontas de gôndola refrigeradas na loja', help: 'Informe a quantidade de pontas de gôndola refrigeradas e o número de portas de cada uma.', required: true, type: 'textarea', full: true },
+      { name: 'observacoes', label: 'Observações adicionais', type: 'textarea', full: true }
+    ];
     const sections = [
       {
         id: 'dados_loja',
@@ -965,11 +1048,9 @@
         id: 'diagnostico_loja',
         label: 'Diagnóstico de loja',
         badge: 'Diagnostico',
-        description: 'Acesse a pasta de fotos do diagnóstico e registre observações sobre a loja.',
+        description: 'Preencha o diagnóstico completo da loja. Campos de quantidade aparecem apenas quando a resposta for Sim.',
         diagnosticLink: true,
-        fields: [
-          { name: 'observacoes', label: 'Observações', type: 'textarea', full: true }
-        ]
+        fields: diagnosticFields
       },
       {
         id: 'ativos_fisicos',
@@ -1071,6 +1152,61 @@
     let adminUsers = [];
     let activeAdminRecordsUserId = null;
     let helpTutorialStep = 0;
+    let diagnosticStores = [];
+
+    function draftStorageKey(sectionId = activeSection?.id) {
+      const userKey = currentUser?.id || currentUser?.pin || 'anonimo';
+      return `onboarding.draft.${userKey}.${sectionId}`;
+    }
+
+    function readFormDraft(sectionId = activeSection?.id) {
+      try {
+        return JSON.parse(localStorage.getItem(draftStorageKey(sectionId)) || '{}');
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveFormDraft() {
+      if (!currentUser || !activeSection || !form.querySelector('[name="section"]')) return;
+
+      const data = {};
+      form.querySelectorAll('input[name], textarea[name], select[name]').forEach(input => {
+        if (input.type === 'hidden' || input.name === 'section' || input.name === 'record_id' || input.disabled) return;
+        data[input.name] = input.value;
+      });
+
+      localStorage.setItem(draftStorageKey(), JSON.stringify(data));
+      updateDraftStatus('Rascunho salvo neste aparelho.');
+    }
+
+    function applyFormDraft() {
+      const draft = readFormDraft();
+      Object.entries(draft).forEach(([name, value]) => {
+        const input = form.querySelector(`[name="${CSS.escape(name)}"]`);
+        if (input && !input.disabled) input.value = value;
+      });
+      updateConditionalFields(form);
+      Object.entries(draft).forEach(([name, value]) => {
+        const input = form.querySelector(`[name="${CSS.escape(name)}"]`);
+        if (input && !input.disabled) input.value = value;
+      });
+      if (Object.keys(draft).length > 0) {
+        updateDraftStatus('Rascunho recuperado deste aparelho.');
+      } else {
+        updateDraftStatus('Rascunho local ativo.');
+      }
+    }
+
+    function clearFormDraft(sectionId = activeSection?.id) {
+      localStorage.removeItem(draftStorageKey(sectionId));
+      updateDraftStatus('Rascunho limpo.');
+    }
+
+    function updateDraftStatus(message) {
+      const target = form.querySelector('[data-draft-status]');
+      if (target) target.textContent = message;
+    }
 
     function setView(view, data = {}) {
       loginView.hidden = view !== 'login';
@@ -1221,11 +1357,45 @@
       const colClass = field.full ? 'col-12' : 'col-md-6';
       const requiredClass = field.required ? 'required' : '';
       const requiredAttr = field.required ? 'required' : '';
+      const helpText = field.help ? `<div class="form-text">${escapeHtml(field.help)}</div>` : '';
+
+      if (field.type === 'store-select') {
+        return `
+          <div class="${colClass}">
+            <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+            ${helpText}
+            <select class="form-select" id="${field.name}" name="${field.name}" data-store-select>
+              <option value="">Carregando lojas cadastradas...</option>
+            </select>
+          </div>
+        `;
+      }
+
+      if (field.type === 'yes-no') {
+        const conditional = field.conditional || null;
+        const conditionalHtml = conditional ? conditionalFieldTemplate(field, conditional) : '';
+
+        return `
+          <div class="${colClass}">
+            <div class="diagnostic-question" data-conditional-group="${field.name}">
+              <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+              ${helpText}
+              <select class="form-select mt-2" id="${field.name}" name="${field.name}" data-conditional-toggle="${field.name}" ${requiredAttr}>
+                <option value="">Selecione</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+              </select>
+              ${conditionalHtml}
+            </div>
+          </div>
+        `;
+      }
 
       if (field.type === 'textarea') {
         return `
           <div class="${colClass}">
             <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+            ${helpText}
             <textarea class="form-control" id="${field.name}" name="${field.name}" rows="3" ${requiredAttr}></textarea>
           </div>
         `;
@@ -1237,6 +1407,7 @@
         return `
           <div class="${colClass}">
             <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+            ${helpText}
             <select class="form-select" id="${field.name}" name="${field.name}" ${requiredAttr}>
               ${options.join('')}
             </select>
@@ -1274,12 +1445,13 @@
       return `
         <div class="${colClass}">
           <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+          ${helpText}
           <input
             class="form-control"
             id="${field.name}"
             name="${field.name}"
             type="${field.type || 'text'}"
-            ${field.numeric ? 'inputmode="numeric" pattern="[0-9]*"' : ''}
+            ${field.numeric || field.inputmode === 'numeric' ? 'inputmode="numeric" pattern="[0-9]*"' : ''}
             ${field.maxLength ? `maxlength="${field.maxLength}"` : ''}
             ${field.maxLength ? `data-max-length="${field.maxLength}"` : ''}
             ${field.numeric ? 'data-numeric="true"' : ''}
@@ -1287,6 +1459,52 @@
             ${requiredAttr}>
         </div>
       `;
+    }
+
+    function conditionalFieldTemplate(parentField, field) {
+      const requiredClass = parentField.required ? 'required' : '';
+      const helpText = field.help ? `<div class="form-text">${escapeHtml(field.help)}</div>` : '';
+
+      if (field.type === 'textarea') {
+        return `
+          <div class="conditional-field" data-conditional-target="${parentField.name}" hidden>
+            <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+            ${helpText}
+            <textarea class="form-control" id="${field.name}" name="${field.name}" rows="3" data-required-when-yes="${parentField.name}" disabled></textarea>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="conditional-field" data-conditional-target="${parentField.name}" hidden>
+          <label class="form-label ${requiredClass}" for="${field.name}">${field.label}</label>
+          ${helpText}
+          <input
+            class="form-control"
+            id="${field.name}"
+            name="${field.name}"
+            type="${field.type || 'text'}"
+            ${field.inputmode === 'numeric' ? 'inputmode="numeric" pattern="[0-9]*"' : ''}
+            data-required-when-yes="${parentField.name}"
+            disabled>
+        </div>
+      `;
+    }
+
+    function updateConditionalFields(scope = form) {
+      scope.querySelectorAll('[data-conditional-toggle]').forEach(toggle => {
+        const targetName = toggle.dataset.conditionalToggle;
+        const target = scope.querySelector(`[data-conditional-target="${targetName}"]`);
+        if (!target) return;
+
+        const isYes = toggle.value === 'Sim';
+        target.hidden = !isYes;
+        target.querySelectorAll('input, textarea, select').forEach(input => {
+          input.disabled = !isYes;
+          input.required = isYes;
+          if (!isYes) input.value = '';
+        });
+      });
     }
 
     function renderSection(section) {
@@ -1328,6 +1546,7 @@
         ${diagnosticLinkBlock}
         ${section.fields.map(fieldTemplate).join('')}
         <div class="col-12 d-flex flex-column flex-sm-row gap-2 justify-content-end mt-2">
+          <span class="draft-status" data-draft-status>Rascunho local ativo.</span>
           <button type="button" class="btn btn-outline-secondary" data-cancel-edit hidden>Cancelar edicao</button>
           <button type="reset" class="btn btn-outline-secondary">Limpar</button>
           <button type="submit" class="btn btn-primary">Salvar registro</button>
@@ -1340,9 +1559,63 @@
         renderBulkGrid(section);
       }
 
+      updateConditionalFields(form);
+      applyFormDraft();
+
+      if (section.id === 'diagnostico_loja') {
+        loadDiagnosticStores();
+      }
+
       if (section.supplierImport) {
         loadSupplierBatches();
       }
+    }
+
+    async function loadDiagnosticStores() {
+      const select = form.querySelector('[data-store-select]');
+      if (!select) return;
+
+      try {
+        const result = await requestJson('backend/api/user_records.php?action=stores');
+        diagnosticStores = result.stores || [];
+        renderDiagnosticStoreOptions();
+      } catch (error) {
+        select.innerHTML = '<option value="">Nao foi possivel carregar as lojas</option>';
+      }
+    }
+
+    function renderDiagnosticStoreOptions() {
+      const select = form.querySelector('[data-store-select]');
+      if (!select) return;
+
+      const selectedValue = readFormDraft().dados_loja_id || select.value;
+      const options = diagnosticStores.length
+        ? diagnosticStores.map(store => `<option value="${store.id}">${escapeHtml(storeLabel(store))}</option>`).join('')
+        : '<option value="">Nenhuma loja cadastrada ainda</option>';
+
+      select.innerHTML = `<option value="">Preencher manualmente</option>${options}`;
+      select.value = selectedValue || '';
+      applySelectedDiagnosticStore();
+    }
+
+    function storeLabel(store) {
+      const name = store.sigla_loja || store.nome_fantasia || `Loja ${store.id}`;
+      return store.endereco ? `${name} - ${store.endereco}` : name;
+    }
+
+    function applySelectedDiagnosticStore() {
+      const select = form.querySelector('[data-store-select]');
+      if (!select || !select.value) return;
+
+      const store = diagnosticStores.find(item => String(item.id) === String(select.value));
+      if (!store) return;
+
+      const nameInput = form.querySelector('[name="loja_nome_numero"]');
+      const addressInput = form.querySelector('[name="endereco_loja"]');
+      const storeName = (store.sigla_loja || store.nome_fantasia || '').trim();
+
+      if (nameInput) nameInput.value = storeName;
+      if (addressInput) addressInput.value = store.endereco || '';
     }
 
     async function loadClientRecords() {
@@ -1517,7 +1790,9 @@
 
     function getDisplayFields(sectionId) {
       const section = sections.find(item => item.id === sectionId) || activeSection;
-      return section.fields;
+      return section.fields
+        .filter(field => !field.hiddenInRecords && field.type !== 'store-select')
+        .flatMap(field => field.conditional ? [field, field.conditional] : [field]);
     }
 
     function editClientRow(index) {
@@ -1540,6 +1815,17 @@
         if (input) {
           input.value = row[field.name] ?? '';
         }
+
+        if (field.conditional) {
+          const child = form.querySelector(`[name="${field.conditional.name}"]`);
+          if (child) child.value = row[field.conditional.name] ?? '';
+        }
+      });
+      updateConditionalFields(form);
+      activeSection.fields.forEach(field => {
+        if (!field.conditional) return;
+        const child = form.querySelector(`[name="${field.conditional.name}"]`);
+        if (child) child.value = row[field.conditional.name] ?? '';
       });
 
       const cancelButton = form.querySelector('[data-cancel-edit]');
@@ -2374,6 +2660,19 @@
     });
 
     form.addEventListener('change', event => {
+      const storeSelect = event.target.closest('[data-store-select]');
+      if (storeSelect) {
+        applySelectedDiagnosticStore();
+        saveFormDraft();
+        return;
+      }
+
+      const conditionalToggle = event.target.closest('[data-conditional-toggle]');
+      if (conditionalToggle) {
+        updateConditionalFields(form);
+        saveFormDraft();
+      }
+
       const selectAll = event.target.closest('[data-select-all]');
       if (selectAll) {
         form.querySelectorAll(`[data-checkbox-group="${selectAll.dataset.selectAll}"]`).forEach(input => {
@@ -2386,11 +2685,20 @@
       const checkbox = event.target.closest('[data-checkbox-group]');
       if (checkbox) {
         syncSelectAll(checkbox.dataset.checkboxGroup);
+        saveFormDraft();
       }
     });
 
     form.addEventListener('input', event => {
       normalizeNumericInput(event.target);
+      if (event.target.matches('input[name], textarea[name], select[name]')) {
+        saveFormDraft();
+      }
+    });
+
+    form.addEventListener('reset', () => {
+      clearFormDraft();
+      setTimeout(() => updateConditionalFields(form));
     });
 
     singleModeButton.addEventListener('click', () => {

@@ -17,7 +17,7 @@ $required = [
     'industrias' => ['cnpj_industria'],
     'dados_bancarios' => ['tipo_pagamento'],
     'plantas_loja' => ['pasta_upload'],
-    'diagnostico_loja' => ['pasta_fotos'],
+    'diagnostico_loja' => ['preenchido_por', 'loja_nome_numero', 'endereco_loja', 'banner_estacionamento', 'banners_gradil_estacionamento', 'antena_alarme_entrada', 'placas_cancela_estacionamento', 'quantidade_checkouts', 'reguas_check_stand', 'quantidade_pontas_gondola', 'quantidade_portas_pontas_refrigeradas', 'quantidade_orelhas_ponta_gondola', 'ilhas_loja', 'localizacao_principais_ilhas', 'quantidade_display_chao', 'backlights', 'exclusividade_ponta_backlight', 'banners_interior', 'retail_media', 'televisores_internos', 'elevadores', 'radio_interna', 'escadas_esteiras_rolantes', 'quantidade_freezers', 'quantidade_pontas_ilha_congelados', 'displays_laterais_lfc', 'walk_in_cooler', 'quantidade_portas_bebidas', 'quantidade_portas_laticinios', 'quantidade_portas_congelados_refrigerados', 'quantidade_carrinhos', 'quantidade_cestas', 'quantidade_check_stands', 'pontas_gondola_refrigeradas_detalhes'],
     'fornecedores_importacao' => ['codigo_fornecedor'],
     'ativos_fisicos' => ['nome_ativo'],
     'ativos_digitais' => ['nome_ativo'],
@@ -166,6 +166,61 @@ function ensureExtraSectionTables(PDO $pdo): void
             CONSTRAINT fk_diagnostico_loja_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios_acesso(id) ON DELETE SET NULL
         )'
     );
+    $diagnosticColumns = [
+        'dados_loja_id' => 'INT NULL',
+        'preenchido_por' => 'VARCHAR(255) NULL',
+        'loja_nome_numero' => 'VARCHAR(255) NULL',
+        'endereco_loja' => 'VARCHAR(500) NULL',
+        'banner_estacionamento' => 'VARCHAR(20) NULL',
+        'banner_estacionamento_quantidade' => 'VARCHAR(80) NULL',
+        'banners_gradil_estacionamento' => 'VARCHAR(20) NULL',
+        'banners_gradil_estacionamento_qtd' => 'VARCHAR(80) NULL',
+        'antena_alarme_entrada' => 'VARCHAR(20) NULL',
+        'antena_alarme_entrada_qtd' => 'VARCHAR(80) NULL',
+        'placas_cancela_estacionamento' => 'VARCHAR(20) NULL',
+        'placas_cancela_estacionamento_qtd' => 'VARCHAR(80) NULL',
+        'quantidade_checkouts' => 'VARCHAR(80) NULL',
+        'reguas_check_stand' => 'VARCHAR(20) NULL',
+        'reguas_check_stand_qtd' => 'VARCHAR(80) NULL',
+        'quantidade_pontas_gondola' => 'VARCHAR(80) NULL',
+        'quantidade_portas_pontas_refrigeradas' => 'VARCHAR(80) NULL',
+        'quantidade_orelhas_ponta_gondola' => 'VARCHAR(80) NULL',
+        'ilhas_loja' => 'VARCHAR(20) NULL',
+        'ilhas_loja_qtd' => 'VARCHAR(80) NULL',
+        'localizacao_principais_ilhas' => 'TEXT NULL',
+        'quantidade_display_chao' => 'VARCHAR(80) NULL',
+        'backlights' => 'VARCHAR(20) NULL',
+        'backlights_qtd' => 'VARCHAR(80) NULL',
+        'exclusividade_ponta_backlight' => 'VARCHAR(20) NULL',
+        'banners_interior' => 'VARCHAR(20) NULL',
+        'banners_interior_detalhes' => 'TEXT NULL',
+        'retail_media' => 'VARCHAR(20) NULL',
+        'retail_media_ativos' => 'TEXT NULL',
+        'televisores_internos' => 'VARCHAR(20) NULL',
+        'televisores_internos_qtd' => 'VARCHAR(80) NULL',
+        'elevadores' => 'VARCHAR(20) NULL',
+        'elevadores_qtd' => 'VARCHAR(80) NULL',
+        'radio_interna' => 'VARCHAR(20) NULL',
+        'escadas_esteiras_rolantes' => 'VARCHAR(20) NULL',
+        'escadas_esteiras_rolantes_qtd' => 'TEXT NULL',
+        'quantidade_freezers' => 'VARCHAR(80) NULL',
+        'quantidade_pontas_ilha_congelados' => 'VARCHAR(80) NULL',
+        'displays_laterais_lfc' => 'VARCHAR(20) NULL',
+        'displays_laterais_lfc_qtd' => 'VARCHAR(80) NULL',
+        'walk_in_cooler' => 'VARCHAR(20) NULL',
+        'walk_in_cooler_portas' => 'VARCHAR(80) NULL',
+        'quantidade_portas_bebidas' => 'VARCHAR(80) NULL',
+        'quantidade_portas_laticinios' => 'VARCHAR(80) NULL',
+        'quantidade_portas_congelados_refrigerados' => 'VARCHAR(80) NULL',
+        'quantidade_carrinhos' => 'VARCHAR(80) NULL',
+        'quantidade_cestas' => 'VARCHAR(80) NULL',
+        'quantidade_check_stands' => 'VARCHAR(80) NULL',
+        'pontas_gondola_refrigeradas_detalhes' => 'TEXT NULL',
+    ];
+
+    foreach ($diagnosticColumns as $column => $definition) {
+        ensureColumn($pdo, 'diagnostico_loja', $column, $definition);
+    }
 
     $pdo->exec(
         "CREATE TABLE IF NOT EXISTS fornecedores_import_lotes (
@@ -264,6 +319,10 @@ function saveRows(PDO $pdo, string $section, array $schema, array $required, arr
             continue;
         }
 
+        if ($section === 'diagnostico_loja') {
+            $row = applyDiagnosticStore($pdo, $row, $userId);
+        }
+
         foreach ($required as $field) {
             if (trim($row[$field] ?? '') === '') {
                 http_response_code(422);
@@ -273,6 +332,10 @@ function saveRows(PDO $pdo, string $section, array $schema, array $required, arr
                 ]);
                 exit;
             }
+        }
+
+        if ($section === 'diagnostico_loja') {
+            validateDiagnosticConditionals($row);
         }
 
         normalizeAndValidateNumericFields($row);
@@ -307,10 +370,18 @@ function saveRows(PDO $pdo, string $section, array $schema, array $required, arr
 
 function saveSingleRow(PDO $pdo, string $section, array $schema, array $required, array $row, int $userId): string
 {
+    if ($section === 'diagnostico_loja') {
+        $row = applyDiagnosticStore($pdo, $row, $userId);
+    }
+
     validateRequired($required, $row);
 
     if (rowIsEmpty($row, $schema)) {
         rejectEmptyRow();
+    }
+
+    if ($section === 'diagnostico_loja') {
+        validateDiagnosticConditionals($row);
     }
 
     normalizeAndValidateNumericFields($row);
@@ -322,10 +393,18 @@ function saveSingleRow(PDO $pdo, string $section, array $schema, array $required
 
 function updateSingleRow(PDO $pdo, string $section, array $schema, array $required, array $row, int $userId, int $recordId): void
 {
+    if ($section === 'diagnostico_loja') {
+        $row = applyDiagnosticStore($pdo, $row, $userId);
+    }
+
     validateRequired($required, $row);
 
     if (rowIsEmpty($row, $schema)) {
         rejectEmptyRow();
+    }
+
+    if ($section === 'diagnostico_loja') {
+        validateDiagnosticConditionals($row);
     }
 
     normalizeAndValidateNumericFields($row);
@@ -427,7 +506,71 @@ function validateRequired(array $required, array $row): void
     }
 }
 
-function normalizeAndValidateNumericFields(array &$row): void
+
+
+function applyDiagnosticStore(PDO $pdo, array $row, int $userId): array
+{
+    $storeId = (int) ($row['dados_loja_id'] ?? 0);
+
+    if ($storeId <= 0) {
+        $row['dados_loja_id'] = null;
+        return $row;
+    }
+
+    $stmt = $pdo->prepare('SELECT id, nome_fantasia, sigla_loja, endereco FROM dados_loja WHERE id = :id AND usuario_id = :usuario_id LIMIT 1');
+    $stmt->execute([
+        ':id' => $storeId,
+        ':usuario_id' => $userId
+    ]);
+
+    $store = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$store) {
+        http_response_code(422);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Selecione uma loja cadastrada valida para este usuario.'
+        ]);
+        exit;
+    }
+
+    $row['dados_loja_id'] = (string) $storeId;
+    $row['loja_nome_numero'] = trim(($store['sigla_loja'] ?: $store['nome_fantasia']) . ' - ' . $store['nome_fantasia'], ' -');
+    $row['endereco_loja'] = $store['endereco'] ?? '';
+
+    return $row;
+}
+
+function validateDiagnosticConditionals(array $row): void
+{
+    $conditionalRequired = [
+        'banner_estacionamento' => 'banner_estacionamento_quantidade',
+        'banners_gradil_estacionamento' => 'banners_gradil_estacionamento_qtd',
+        'antena_alarme_entrada' => 'antena_alarme_entrada_qtd',
+        'placas_cancela_estacionamento' => 'placas_cancela_estacionamento_qtd',
+        'reguas_check_stand' => 'reguas_check_stand_qtd',
+        'ilhas_loja' => 'ilhas_loja_qtd',
+        'backlights' => 'backlights_qtd',
+        'banners_interior' => 'banners_interior_detalhes',
+        'retail_media' => 'retail_media_ativos',
+        'televisores_internos' => 'televisores_internos_qtd',
+        'elevadores' => 'elevadores_qtd',
+        'escadas_esteiras_rolantes' => 'escadas_esteiras_rolantes_qtd',
+        'displays_laterais_lfc' => 'displays_laterais_lfc_qtd',
+        'walk_in_cooler' => 'walk_in_cooler_portas',
+    ];
+
+    foreach ($conditionalRequired as $question => $detailField) {
+        if (trim($row[$question] ?? '') === 'Sim' && trim($row[$detailField] ?? '') === '') {
+            http_response_code(422);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Preencha os detalhes obrigatorios das perguntas respondidas com Sim.'
+            ]);
+            exit;
+        }
+    }
+}function normalizeAndValidateNumericFields(array &$row): void
 {
     $rules = [
         'cnpj' => ['length' => 14, 'label' => 'CNPJ'],
